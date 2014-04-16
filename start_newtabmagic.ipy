@@ -1,0 +1,5 @@
+# Usage: python -m IPython start_magic.ipy -i
+%load_ext newtabmagic
+%newtab --port 8889
+%newtab --browser firefox
+%newtab --server start

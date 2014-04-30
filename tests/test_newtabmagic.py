@@ -100,3 +100,33 @@ def test_set_port_server_running():
     result = newtab.base_url()
     expected = root_original
     nose.tools.assert_equals(result, expected)
+
+
+def test_set_content_type():
+
+    newtab = get_newtabmagic(browser='firefox')
+
+    # default is 'html'
+    with stdout_redirected() as out:
+        newtab.newtab('--show')
+    output = out.getvalue()
+    assert 'content-type: html' in output
+
+    # switch to 'text'
+    with stdout_redirected() as out:
+        newtab.newtab('--content-type text')
+        newtab.newtab('--show')
+    output = out.getvalue()
+    assert 'content-type: text' in output
+
+    # switch to 'html'
+    with stdout_redirected() as out:
+        newtab.newtab('--content-type html')
+        newtab.newtab('--show')
+    output = out.getvalue()
+    assert 'content-type: html' in output
+
+    # invalid content type
+    nose.tools.assert_raises(
+        IPython.core.error.UsageError,
+        newtab.newtab, '--content-type invalid')

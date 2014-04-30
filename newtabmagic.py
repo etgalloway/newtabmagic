@@ -82,7 +82,7 @@ class NewTabMagics(Magics):
         self._browser = None
         self._server = ServerProcess()
         self.new_tabs_enabled = True
-        self.log_cmdline_open_new_tab = False
+        self._cmds = []
 
     @line_magic
     @magic_arguments()
@@ -139,20 +139,26 @@ class NewTabMagics(Magics):
             self._content_type = args.content_type
 
         if args.names:
-            self.open_new_tabs(args.names)
+            if self._browser:
+                self._open_new_tabs(args.names)
+            else:
+                msg = "Browser not initialized\n"
+                raise UsageError(msg)
 
         if args.show:
             self.show(args.show)
 
-    def open_new_tabs(self, names):
+    def _open_new_tabs(self, names):
         """Open browser tabs for a list of variable names and paths."""
-
+        self._cmds = []
         for name in names:
             url, msg = self.get_url(name)
             if not url:
                 print(msg)
             else:
-                self.open_new_tab(url)
+                cmd = [self._browser, url]
+                self._cmds.append(cmd)
+                self._open_new_tab(cmd)
 
     def get_url(self, name):
         """Get url associated with name, returning None if not found"""
@@ -194,6 +200,11 @@ class NewTabMagics(Magics):
         return obj
 
     @property
+    def command_lines(self):
+        """Command lines used (most recently) to invoke subproccesses."""
+        return self._cmds
+
+    @property
     def browser(self):
         """Name of browser used to open new tabs."""
         return self._browser
@@ -204,22 +215,15 @@ class NewTabMagics(Magics):
         browser_name = ' '.join(browser_args)
         self._browser = browser_name.strip('"\'')
 
-    def open_new_tab(self, url):
-        """Open new tab in browser if browser has been initialized."""
-        if self._browser:
-            cmd = [self._browser, url]
-            if self.log_cmdline_open_new_tab:
-                print('{} {}'.format(cmd[0], cmd[1]))
-            try:
-                if self.new_tabs_enabled:
-                    # chromium browser writes to screen, so redirect
-                    subprocess.Popen(cmd, stdout=subprocess.PIPE)
-            except OSError:
-                msg = "Browser named {} failed to open new tab\n".format(
-                    self._browser)
-                raise UsageError(msg)
-        else:
-            msg = "Browser not initialized\n"
+    def _open_new_tab(self, cmd):
+        """Open a new browser tab by invoking a subprocess."""
+        try:
+            if self.new_tabs_enabled:
+                # chromium browser writes to screen, so redirect
+                subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        except OSError:
+            msg = "Browser named {} failed to open new tab\n".format(
+                self._browser)
             raise UsageError(msg)
 
     def show(self, arg):

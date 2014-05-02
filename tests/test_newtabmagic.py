@@ -216,3 +216,78 @@ def test_show():
     diff = [line for line in result if line not in expected]
     nose.tools.assert_equals(len(diff), 1)
     assert diff[0].startswith('server pid: ')
+
+
+def test_newtab_name_argument():
+    # test for a single name argument
+
+    browser = 'firefox'
+    newtab = get_newtabmagic(browser=browser)
+    url = newtab.base_url()
+
+    with stdout_redirected() as out:
+        newtab.newtab('sys') # name argument
+
+    output = out.getvalue()
+    nose.tools.assert_equals(output, '')
+
+    result = newtab.command_lines
+    expected = [[browser, url + 'sys.html']]
+    nose.tools.assert_equals(result, expected)
+
+
+def test_newtab_name_arguments():
+    #test for multiple name arguments
+
+    browser = 'firefox'
+    newtab = get_newtabmagic(browser=browser)
+    url = newtab.base_url()
+
+    with stdout_redirected() as out:
+        newtab.newtab('sys os zip') # name arguments
+
+    output = out.getvalue()
+    nose.tools.assert_equals(output, '')
+
+    result = newtab.command_lines
+    expected = [[browser, url + 'sys.html'],
+                [browser, url + 'os.html'],
+                [browser, url + 'zip.html']]
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_doc_not_found():
+
+    newtab = get_newtabmagic(browser='firefox')
+
+    with stdout_redirected() as out:
+        newtab.newtab('does.not.exist')
+
+    result = out.getvalue()
+    expected = 'Documentation not found: does.not.exist\n'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_browser_not_initialized():
+    # Exception thrown if browser not initialized
+
+    newtab = get_newtabmagic()
+
+    try:
+        newtab.newtab('sys')
+    except IPython.core.error.UsageError as error:
+        result = error.args
+
+    expected = ('Browser not initialized\n',)
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_nonexistent_browser():
+    # Exception thrown if browser does not exist
+
+    newtab = get_newtabmagic(new_tabs_enabled=True)
+    newtab.newtab('--browser nonexistent')
+
+    nose.tools.assert_raises(
+        IPython.core.error.UsageError,
+        newtab.newtab, 'sys')

@@ -181,3 +181,38 @@ def test_server_already_started():
         'Server running at {}\n'.format(newtab.base_url())
     result = out.getvalue()
     nose.tools.assert_equals(result, expected)
+
+
+def test_show():
+
+    newtab = get_newtabmagic(browser='firefox', port=8888)
+
+    # Server not running
+    with stdout_redirected() as out:
+        newtab.newtab('--show')
+
+    result = out.getvalue()
+    expected = "\n".join(['browser: firefox',
+                'content-type: html',
+                'server running: False',
+                'server port: 8888',
+                'server root url: http://127.0.0.1:8888/',
+                ''])
+    nose.tools.assert_equals(result, expected)
+
+    # Server running
+    with server_running(newtab):
+        with stdout_redirected() as out:
+            newtab.newtab('--show')
+
+    expected = ['browser: firefox',
+                'content-type: html',
+                'server poll: None',
+                'server running: True',
+                'server port: 8888',
+                'server root url: http://127.0.0.1:8888/',
+                '']
+    result = out.getvalue().split('\n')
+    diff = [line for line in result if line not in expected]
+    nose.tools.assert_equals(len(diff), 1)
+    assert diff[0].startswith('server pid: ')

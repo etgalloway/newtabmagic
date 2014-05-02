@@ -130,3 +130,54 @@ def test_set_content_type():
     nose.tools.assert_raises(
         IPython.core.error.UsageError,
         newtab.newtab, '--content-type invalid')
+
+
+def test_server_start_stop():
+
+    newtab = get_newtabmagic()
+    url = newtab.base_url()
+
+    # Start server
+    with stdout_redirected() as out:
+        newtab.newtab('--server start')
+
+    result = out.getvalue()
+    expected = ("Starting job # ? in a separate thread.\n"
+       "Server running at {}\n".format(url))
+    n = expected.index("?")
+    nose.tools.assert_equal(result[:n], expected[:n])
+    nose.tools.assert_equal(result[n+1:], expected[n+1:])
+
+    # Stop server
+    with stdout_redirected() as out:
+        newtab.newtab('--server stop')
+
+    result = out.getvalue()
+    expected = 'Server process is terminated.\n'
+    nose.tools.assert_equal(result, expected)
+
+
+def test_server_stop_not_started():
+
+    newtab = get_newtabmagic()
+
+    with stdout_redirected() as out:
+        newtab.newtab('--server stop')
+
+    result = out.getvalue()
+    expected = 'Server not started.\n'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_server_already_started():
+
+    newtab = get_newtabmagic()
+
+    with server_running(newtab):
+        with stdout_redirected() as out:
+            newtab.newtab('--server start')
+
+    expected = 'Server already started\n' + \
+        'Server running at {}\n'.format(newtab.base_url())
+    result = out.getvalue()
+    nose.tools.assert_equals(result, expected)

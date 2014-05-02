@@ -29,11 +29,13 @@ Sample Usage
         In [7]: Tracer = IPython.core.debugger.Tracer()
         In [8]: %newtab Tracer
 
-    Show state using optional 'reproducible' argument:
+    Show state:
 
-        In [11]: %newtab --show reproducible
+        In [9]: # random \
+        ...: %newtab --show
         browser: firefox
         content-type: html
+        server pid: 3096
         server poll: None
         server running: True
         server port: 8889
@@ -41,7 +43,7 @@ Sample Usage
 
     Stop server:
 
-        In [14]: %newtab --server stop
+        In [10]: %newtab --server stop
         Server process is terminated.
 
     Note: shutting down IPython stops the server.
@@ -108,10 +110,8 @@ class NewTabMagics(Magics):
     )
     @argument(
         '--show',
-        choices=['all', 'reproducible'],
-        const='all',
-        help='Show state for newtabmagic.',
-        nargs='?'
+        help='Show state of magic.',
+        action='store_true'
     )
     @argument(
         '--content-type',
@@ -146,7 +146,7 @@ class NewTabMagics(Magics):
                 raise UsageError(msg)
 
         if args.show:
-            self.show(args.show)
+            self._show()
 
     def _open_new_tabs(self, names):
         """Open browser tabs for a list of variable names and paths."""
@@ -226,21 +226,16 @@ class NewTabMagics(Magics):
                 self._browser)
             raise UsageError(msg)
 
-    def show(self, arg):
+    def _show(self):
         """Show state of magic."""
-
-        reproducible = (arg == 'reproducible')
-
+        msg = ''
         if self._browser:
-            msg = 'browser: {}\n'.format(self._browser)
+            msg += 'browser: {}\n'.format(self._browser)
         else:
-            msg = 'browser: None\n'
-
+            msg += 'browser: None\n'
         msg += 'content-type: {}\n'.format(self._content_type)
-
         print(msg, end='')
-
-        self._server.show(reproducible)
+        self._server.show()
 
     def server_running(self):
         """Interrogate server to see if it is still running."""
@@ -296,18 +291,15 @@ class ServerProcess(object):
         """If the server has been started, is it still running?"""
         return self._process is not None and self._process.poll() is None
 
-    def show(self, reproducible=False):
+    def show(self):
         """Show state."""
-
         msg = ''
         if self._process:
-            if not reproducible:
-                msg += 'server pid: {}\n'.format(self._process.pid)
+            msg += 'server pid: {}\n'.format(self._process.pid)
             msg += 'server poll: {}\n'.format(self._process.poll())
         msg += 'server running: {}\n'.format(self.running())
         msg += 'server port: {}\n'.format(self._port)
         msg += 'server root url: {}\n'.format(self.url())
-
         print(msg, end='')
 
     def url(self):

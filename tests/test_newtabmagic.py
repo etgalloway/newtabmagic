@@ -5,6 +5,10 @@ To run tests:
 
     nosetests test_newtabmagic.py
 
+To skip tests that fail under Python 3.2:
+
+    nosetests test_newtabmagic.py -a '!py32failure'
+
 '''
 # pylint: disable=C0111, C0321, R0903
 import contextlib
@@ -14,6 +18,8 @@ import sys
 import IPython
 import newtabmagic
 
+from IPython.testing.decorators import skipif
+from nose.plugins.attrib import attr
 
 if sys.version_info.major == 2:
     from StringIO import StringIO
@@ -291,3 +297,78 @@ def test_name_argument_nonexistent_browser():
     nose.tools.assert_raises(
         IPython.core.error.UsageError,
         newtab.newtab, 'sys')
+
+
+def test_fully_qualified_name_module():
+    # object is a module
+    obj = sys
+    result = newtabmagic.fully_qualified_name(obj)
+    expected = 'sys'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_fully_qualified_name_module_unavailable():
+    # name of module in which object is defined is not available
+    result = newtabmagic.fully_qualified_name(''.split)
+    expected = 'str.split'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_fully_qualified_name_builtin_module():
+    # object is defined in the 'builtin' module
+    obj = len
+    result = newtabmagic.fully_qualified_name(obj)
+    expected = 'len'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_fully_qualified_name_not_builtin_module():
+    # object is defined in a module other than 'builtin'
+    obj = sys.settrace
+    result = newtabmagic.fully_qualified_name(obj)
+    expected = 'sys.settrace'
+    nose.tools.assert_equals(result, expected)
+
+
+@attr('py32failure')
+def test_full_name_decorated_function():
+    # In Python 3.3, object has an undecorated.__qualname__ attribute
+    # In Python 2.7, object has an im_class attribute
+    obj = newtabmagic.NewTabMagics.newtab
+    result = newtabmagic.fully_qualified_name(obj)
+    expected = 'newtabmagic.NewTabMagics.newtab'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_fully_qualied_name_qualname_attribute():
+    # In Python 3.3, object has __qualname__ attribute
+    # In Python 3.2, object has __name__ attribute
+    # In Python 2.7, object has __name__ attribute
+    obj = sys.settrace
+    result = newtabmagic.fully_qualified_name(obj)
+    expected = 'sys.settrace'
+    nose.tools.assert_equals(result, expected)
+
+
+@skipif(sys.version_info[:2] != (2, 7))
+def test_fully_qualified_name_objclass_attribute():
+    # In Python 2.7, object has __objclass__ attribute
+    obj = str.split
+    result = newtabmagic.fully_qualified_name(obj)
+    assert result == 'str.split'
+
+
+@skipif(sys.version_info[:2] != (2, 7))
+def test_fully_qualified_name_self_attribute():
+    # In Python 2.7, object has __self__ attribute
+    obj = ''.split
+    result = newtabmagic.fully_qualified_name(obj)
+    assert result == 'str.split'
+
+
+def test_fully_qualified_name_type():
+    # Object type has a __name__ attribute
+    obj = 0
+    result = newtabmagic.fully_qualified_name(obj)
+    expected = 'int'
+    assert result == expected

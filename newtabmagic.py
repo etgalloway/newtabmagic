@@ -333,24 +333,24 @@ def fully_qualified_name(obj):
     else:
         module_name = get_module_name(obj)
         if not module_name or module_name in builtins:
-            name = qualname(obj, module_name)
+            name = _qualname(obj, module_name)
         else:
-            name = module_name + '.' + qualname(obj, module_name)
+            name = module_name + '.' + _qualname(obj, module_name)
     return name
 
 
-def qualname(obj, module_name):
+def _qualname(obj, module_name):
     """Qualified name not including module name."""
 
     if sys.version_info >= (3, 3):
-        return qualname33(obj)
+        return _qualname33(obj)
     elif sys.version_info >= (3, 0):
-        return qualname32(obj)
+        return _qualname32(obj)
     else:
-        return qualname27(obj, module_name)
+        return _qualname27(obj, module_name)
 
 
-def qualname33(obj):
+def _qualname33(obj):
     """Qualified name, not including module name, for Python 3.3+."""
     try:
         return obj.undecorated.__qualname__
@@ -361,7 +361,7 @@ def qualname33(obj):
             return type(obj).__name__
 
 
-def qualname32(obj):
+def _qualname32(obj):
     """Qualified name, not including module name, for Python 3.0-3.2."""
     try:
         return obj.__objclass__.__name__ + "." + obj.__name__
@@ -377,7 +377,7 @@ def qualname32(obj):
             except AttributeError:
                 return type(obj).__name__
 
-def qualname27(obj, module_name):
+def _qualname27(obj, module_name):
     """Qualified name, not including module name, Python 2.7."""
     try:
         return obj.__objclass__.__name__ + "." + obj.__name__

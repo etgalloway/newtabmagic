@@ -166,14 +166,10 @@ class NewTabMagics(Magics):
 
     def _get_pydoc_url(self, name):
         """Get pydoc url for name of variable or path."""
-        root = self._server.url()
         msg = ''
         page = self._get_pydoc_page_name(name)
         if page:
-            if self._content_type == 'html':
-                url = root + page + '.html'
-            else:
-                url = root + page + '.txt'
+            url = self._pydoc_url(page)
         else:
             url = None
             msg = 'Documentation not found: {}'.format(name)
@@ -244,6 +240,15 @@ class NewTabMagics(Magics):
     def base_url(self):
         """Base Url for newtabmagic server."""
         return self._server.url()
+
+    def _pydoc_url(self, page):
+        """Return url for pydoc help page."""
+        root = self._server.url()
+        if self._content_type == 'html':
+            url = root + page + '.html'
+        else:
+            url = root + page + '.txt'
+        return url
 
 class ServerProcess(object):
     """Class for the newtabmagic server process."""

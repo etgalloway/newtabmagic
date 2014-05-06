@@ -152,7 +152,7 @@ class NewTabMagics(Magics):
         """Open browser tabs for a list of variable names and paths."""
         self._cmds = []
         for name in names:
-            url, msg = self.get_url(name)
+            url, msg = self._get_url(name)
             if not url:
                 print(msg)
             else:
@@ -160,15 +160,15 @@ class NewTabMagics(Magics):
                 self._cmds.append(cmd)
                 self._open_new_tab(cmd)
 
-    def get_url(self, name):
+    def _get_url(self, name):
         """Get url associated with name, returning None if not found"""
-        return self.get_pydoc_url(name)
+        return self._get_pydoc_url(name)
 
-    def get_pydoc_url(self, name):
+    def _get_pydoc_url(self, name):
         """Get pydoc url for name of variable or path."""
         root = self._server.url()
         msg = ''
-        page = self.get_pydoc_page_name(name)
+        page = self._get_pydoc_page_name(name)
         if page:
             if self._content_type == 'html':
                 url = root + page + '.html'
@@ -179,22 +179,22 @@ class NewTabMagics(Magics):
             msg = 'Documentation not found: {}'.format(name)
         return url, msg
 
-    def get_pydoc_page_name(self, path):
+    def _get_pydoc_page_name(self, path):
         """Return name of pydoc page, or None if path is not valid."""
-        obj = self.get_object(path)
+        obj = self._get_object(path)
         if obj:
             page_name = fully_qualified_name(obj)
         else:
             page_name = None
         return page_name
 
-    def get_object(self, path):
+    def _get_object(self, path):
         """Return object, or None if the object does not exist."""
         parts = [part for part in path.split('.') if part]
         if parts[0] in self.shell.user_ns:
             obj = self.shell.user_ns[parts[0]]
             if parts[1:]:
-                obj = getattr_path(obj, parts[1:])
+                obj = _getattr_path(obj, parts[1:])
         else:
             obj = pydoc.locate(path)
         return obj
@@ -401,7 +401,7 @@ def _qualname27(obj, module_name):
             except AttributeError:
                 return type(obj).__name__
 
-def getattr_path(obj, attrs):
+def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.
 

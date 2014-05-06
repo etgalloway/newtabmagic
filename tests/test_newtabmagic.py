@@ -23,8 +23,10 @@ from nose.plugins.attrib import attr
 
 if sys.version_info.major == 2:
     from StringIO import StringIO
+    from urlparse import urlparse
 else:
     from io import StringIO
+    from urllib.parse import urlparse
 
 
 if not IPython.get_ipython():
@@ -297,6 +299,60 @@ def test_name_argument_nonexistent_browser():
     nose.tools.assert_raises(
         IPython.core.error.UsageError,
         newtab.newtab, 'sys')
+
+
+def _url_name(newtab):
+    """Return name part of url."""
+    url = newtab.command_lines[0][1]
+    path = urlparse(url).path
+    # drop leading '/' and trailing extension
+    if path.endswith('.html'):
+        return path[1:-5]
+    elif path.endswith('.txt'):
+        return path[1:-4]
+
+
+def test_name_argument_find_pydoc_url():
+    # Tests to make sure that pydoc urls are
+    # found for name strings.
+
+    newtab = get_newtabmagic(browser='firefox')
+
+    # Name in user name space
+    arg = 'pydoc'
+    newtab.shell.run_cell('import ' + arg)
+    assert arg in newtab.shell.user_ns
+    newtab.newtab(arg)
+    result = _url_name(newtab)
+    expected = arg
+    nose.tools.assert_equals(expected, result)
+
+    # Name in user namespace with attribute
+    arg = 'pydoc.locate'
+    assert 'pydoc' in newtab.shell.user_ns
+    newtab.newtab(arg)
+    result = _url_name(newtab)
+    expected = arg
+    nose.tools.assert_equals(expected, result)
+
+    # Name not in user name space
+    arg = 'cmath'
+    assert arg not in newtab.shell.user_ns
+    newtab.newtab(arg)
+    result = _url_name(newtab)
+    expected = arg
+    nose.tools.assert_equals(expected, result)
+
+    # module in user namespace, nonexistent attribute
+    arg = 'pydoc.non_existent_attribute'
+    assert 'pydoc' in newtab.shell.user_ns
+    newtab.newtab(arg)
+    nose.tools.assert_equals(newtab.command_lines, [])
+
+    # invalid path
+    arg = 'does.not.exist'
+    newtab.newtab(arg)
+    nose.tools.assert_equals(newtab.command_lines, [])
 
 
 def test_fully_qualified_name_module():

@@ -301,6 +301,25 @@ def test_name_argument_nonexistent_browser():
         newtab.newtab, 'sys')
 
 
+def test_name_argument_content_type():
+
+    browser = 'firefox'
+    newtab = get_newtabmagic(browser=browser)
+    url = newtab.base_url()
+
+    newtab.newtab('--content-type html')
+    newtab.newtab('sys')
+    result = newtab.command_lines
+    expected = [[browser, url + 'sys.html']]
+    assert result == expected
+
+    newtab.newtab('--content-type text')
+    newtab.newtab('sys')
+    result = newtab.command_lines
+    expected = [[browser, url + 'sys.txt']]
+    assert result == expected
+
+
 def _url_name(newtab):
     """Return name part of url."""
     url = newtab.command_lines[0][1]

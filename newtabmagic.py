@@ -225,17 +225,10 @@ class NewTabMagics(Magics):
     def _show(self):
         """Show state of magic."""
         msg = ''
-        if self._browser:
-            msg += 'browser: {}\n'.format(self._browser)
-        else:
-            msg += 'browser: None\n'
+        msg += 'browser: {}\n'.format(self._browser)
         msg += 'content-type: {}\n'.format(self._content_type)
         print(msg, end='')
         self._server.show()
-
-    def server_running(self):
-        """Interrogate server to see if it is still running."""
-        return self._server.running()
 
     def base_url(self):
         """Base Url for newtabmagic server."""

@@ -258,11 +258,13 @@ class ServerProcess(object):
             # IPython stops the server process.
 
             module = 'newtabmagic'
-            path = os.path.dirname(os.path.realpath(__file__))
+            path = repr(os.path.dirname(os.path.realpath(__file__)))
 
-            lines = ('import sys; sys.path += [{0}];'
-                     'import {1}; {1}.start_server({2})')
-            cell = lines.format(repr(path), module, self._port)
+            lines = ('import sys\n'
+                     'sys.path.append({path})\n'
+                     'import {module}\n'
+                     '{module}.start_server({port})')
+            cell = lines.format(path=path, module=module, port=self._port)
 
             line = "python --proc proc --bg"
             ip = get_ipython()

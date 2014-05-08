@@ -191,6 +191,20 @@ def test_server_already_started():
     nose.tools.assert_equals(result, expected)
 
 
+def test_server_already_stopped():
+
+    newtab = get_newtabmagic()
+
+    newtab.newtab('--server start')
+    newtab.newtab('--server stop')
+    with stdout_redirected() as out:
+        newtab.newtab('--server stop')
+
+    expected = 'Server process is already stopped.\n'
+    result = out.getvalue()
+    nose.tools.assert_equals(result, expected)
+
+
 def test_show():
 
     newtab = get_newtabmagic(browser='firefox', port=8888)

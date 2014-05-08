@@ -254,23 +254,7 @@ class ServerProcess(object):
         """Start server if not previously started."""
         msg = ''
         if not self.running():
-            # Using script cell magic so that shutting down
-            # IPython stops the server process.
-
-            module = 'newtabmagic'
-            path = repr(os.path.dirname(os.path.realpath(__file__)))
-
-            lines = ('import sys\n'
-                     'sys.path.append({path})\n'
-                     'import {module}\n'
-                     '{module}.start_server({port})')
-            cell = lines.format(path=path, module=module, port=self._port)
-
-            line = "python --proc proc --bg"
-            ip = get_ipython()
-            ip.run_cell_magic("script", line, cell)
-            self._process = ip.user_ns['proc']
-
+            self._process = start_server_background(self._port)
         else:
             msg = 'Server already started\n'
         msg += 'Server running at {}'.format(self.url())
@@ -524,6 +508,27 @@ def start_server(port):
     application.listen(port)
 
     tornado.ioloop.IOLoop.instance().start()
+
+
+def start_server_background(port):
+    """Start the newtab server server as a background process."""
+
+    # Using script cell magic so that shutting down
+    # IPython stops the server process.
+
+    path = repr(os.path.dirname(os.path.realpath(__file__)))
+    lines = ('import sys\n'
+             'sys.path.append({path})\n'
+             'import {module}\n'
+             '{module}.start_server({port})')
+    cell = lines.format(path=path, module='newtabmagic', port=port)
+
+    line = "python --proc proc --bg"
+    ip = get_ipython()
+    ip.run_cell_magic("script", line, cell)
+
+    return ip.user_ns['proc']
+
 
 def load_ipython_extension(ip):
     """Load NewTabMagics extension."""

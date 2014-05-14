@@ -206,10 +206,10 @@ class NewTabMagics(Magics):
         return self._browser
 
     @browser.setter
-    def browser(self, browser_args):
-        """Set browser name."""
-        browser_name = ' '.join(browser_args)
-        self._browser = browser_name.strip('"\'')
+    def browser(self, args):
+        """Set browser by name or path."""
+        path = ' '.join(args).strip('\'\"')
+        self._browser = path
 
     def _open_new_tab(self, cmd):
         """Open a new browser tab by invoking a subprocess."""
@@ -231,7 +231,7 @@ class NewTabMagics(Magics):
         self._server.show()
 
     def base_url(self):
-        """Base Url for newtabmagic server."""
+        """Base url for newtabmagic server."""
         return self._server.url()
 
     def _pydoc_url(self, page):
@@ -248,7 +248,7 @@ class ServerProcess(object):
 
     def __init__(self):
         self._process = None
-        self._port = 8888
+        self._port = 8889
 
     def start(self):
         """Start server if not previously started."""
@@ -315,7 +315,7 @@ def fully_qualified_name(obj):
     if inspect.ismodule(obj):
         name = obj.__name__
     else:
-        module_name = get_module_name(obj)
+        module_name = _get_module_name(obj)
         if not module_name or module_name in builtins:
             name = _qualname(obj, module_name)
         else:
@@ -402,7 +402,7 @@ def _getattr_path(obj, attrs):
     return obj
 
 
-def get_module_name(object_):
+def _get_module_name(object_):
     """Return module name of object, or module name of object's class."""
     try:
         name = object_.__module__
@@ -516,12 +516,14 @@ def start_server_background(port):
     # Using script cell magic so that shutting down
     # IPython stops the server process.
 
+    module = 'newtabmagic'
     path = repr(os.path.dirname(os.path.realpath(__file__)))
+
     lines = ('import sys\n'
              'sys.path.append({path})\n'
              'import {module}\n'
              '{module}.start_server({port})')
-    cell = lines.format(path=path, module='newtabmagic', port=port)
+    cell = lines.format(path=path, module=module, port=port)
 
     line = "python --proc proc --bg"
     ip = get_ipython()

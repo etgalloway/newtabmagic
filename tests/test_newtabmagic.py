@@ -3,11 +3,7 @@ Tests for newtabmagic
 
 To run tests:
 
-    nosetests test_newtabmagic.py
-
-To skip tests that fail under Python 3.2:
-
-    nosetests test_newtabmagic.py -a '!py32failure'
+    nosetests
 
 '''
 # pylint: disable=C0111, C0321, R0903
@@ -19,7 +15,6 @@ import IPython
 import newtabmagic
 
 from IPython.testing.decorators import skipif
-from nose.plugins.attrib import attr
 
 if sys.version_info.major == 2:
     from StringIO import StringIO
@@ -418,8 +413,7 @@ def test_fully_qualified_name_not_builtin_module():
     expected = 'sys.settrace'
     nose.tools.assert_equals(result, expected)
 
-
-@attr('py32failure')
+@skipif(sys.version_info[:2] == (3, 2))
 def test_full_name_decorated_function():
     # In Python 3.3, object has an undecorated.__qualname__ attribute
     # In Python 2.7, object has an im_class attribute

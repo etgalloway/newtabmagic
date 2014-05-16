@@ -147,9 +147,9 @@ def test_server_start_stop():
     result = out.getvalue()
     expected = ("Starting job # ? in a separate thread.\n"
        "Server running at {}\n".format(url))
-    n = expected.index("?")
-    nose.tools.assert_equal(result[:n], expected[:n])
-    nose.tools.assert_equal(result[n+1:], expected[n+1:])
+    head, tail = expected.split('?')
+    nose.tools.assert_true(result.startswith(head))
+    nose.tools.assert_true(result.endswith(tail))
 
     # Stop server
     with stdout_redirected() as out:

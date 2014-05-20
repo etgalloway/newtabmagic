@@ -451,7 +451,9 @@ def test_fully_qualified_name_self_attribute():
 
 def test_fully_qualified_name_type():
     # Object type has a __name__ attribute
-    obj = 0
-    result = newtabmagic.fully_qualified_name(obj)
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('x = 0')
+    newtab.newtab('x')
+    result = _url_name(newtab)
     expected = 'int'
-    assert result == expected
+    nose.tools.assert_equals(result, expected)

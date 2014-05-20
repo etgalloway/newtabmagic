@@ -178,7 +178,7 @@ class NewTabMagics(Magics):
     def _get_pydoc_page_name(self, path):
         """Return name of pydoc page, or None if path is not valid."""
         obj = self._get_object(path)
-        if obj:
+        if obj is not None:
             page_name = fully_qualified_name(obj)
         else:
             page_name = None

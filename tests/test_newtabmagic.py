@@ -385,31 +385,41 @@ def test_name_argument_find_pydoc_url():
 
 def test_fully_qualified_name_module():
     # object is a module
-    obj = sys
-    result = newtabmagic.fully_qualified_name(obj)
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('import sys')
+    newtab.newtab('sys')
+    result = _url_name(newtab)
     expected = 'sys'
     nose.tools.assert_equals(result, expected)
 
 
 def test_fully_qualified_name_module_unavailable():
-    # name of module in which object is defined is not available
-    result = newtabmagic.fully_qualified_name(''.split)
+    # "".split.__module__ is None
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('f = "".split')
+    newtab.newtab('f')
+    result = _url_name(newtab)
     expected = 'str.split'
     nose.tools.assert_equals(result, expected)
 
 
 def test_fully_qualified_name_builtin_module():
     # object is defined in the 'builtin' module
-    obj = len
-    result = newtabmagic.fully_qualified_name(obj)
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('f = len')
+    newtab.newtab('f')
+    result = _url_name(newtab)
     expected = 'len'
     nose.tools.assert_equals(result, expected)
 
 
 def test_fully_qualified_name_not_builtin_module():
     # object is defined in a module other than 'builtin'
-    obj = sys.settrace
-    result = newtabmagic.fully_qualified_name(obj)
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('import sys')
+    newtab.shell.run_cell('f=sys.settrace')
+    newtab.newtab('f')
+    result = _url_name(newtab)
     expected = 'sys.settrace'
     nose.tools.assert_equals(result, expected)
 
@@ -417,18 +427,24 @@ def test_fully_qualified_name_not_builtin_module():
 def test_full_name_decorated_function():
     # In Python 3.3, object has an undecorated.__qualname__ attribute
     # In Python 2.7, object has an im_class attribute
-    obj = newtabmagic.NewTabMagics.newtab
-    result = newtabmagic.fully_qualified_name(obj)
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('import newtabmagic')
+    newtab.shell.run_cell('f=newtabmagic.NewTabMagics.newtab')
+    newtab.newtab('f')
+    result = _url_name(newtab)
     expected = 'newtabmagic.NewTabMagics.newtab'
     nose.tools.assert_equals(result, expected)
 
 
-def test_fully_qualied_name_qualname_attribute():
+def test_fully_qualified_name_qualname_attribute():
     # In Python 3.3, object has __qualname__ attribute
     # In Python 3.2, object has __name__ attribute
     # In Python 2.7, object has __name__ attribute
-    obj = sys.settrace
-    result = newtabmagic.fully_qualified_name(obj)
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('import sys')
+    newtab.shell.run_cell('f = sys.settrace')
+    newtab.newtab('f')
+    result = _url_name(newtab)
     expected = 'sys.settrace'
     nose.tools.assert_equals(result, expected)
 
@@ -436,17 +452,23 @@ def test_fully_qualied_name_qualname_attribute():
 @skipif(sys.version_info[:2] != (2, 7))
 def test_fully_qualified_name_objclass_attribute():
     # In Python 2.7, object has __objclass__ attribute
-    obj = str.split
-    result = newtabmagic.fully_qualified_name(obj)
-    assert result == 'str.split'
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('f = str.split')
+    newtab.newtab('f')
+    result = _url_name(newtab)
+    expected = 'str.split'
+    nose.tools.assert_equals(result, expected)
 
 
 @skipif(sys.version_info[:2] != (2, 7))
 def test_fully_qualified_name_self_attribute():
     # In Python 2.7, object has __self__ attribute
-    obj = ''.split
-    result = newtabmagic.fully_qualified_name(obj)
-    assert result == 'str.split'
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('f = ''.split')
+    newtab.newtab('f')
+    result = _url_name(newtab)
+    expected = 'str.split'
+    nose.tools.assert_equals(result, expected)
 
 
 def test_fully_qualified_name_type():

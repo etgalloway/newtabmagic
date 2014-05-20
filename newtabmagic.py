@@ -177,22 +177,25 @@ class NewTabMagics(Magics):
 
     def _get_pydoc_page_name(self, path):
         """Return name of pydoc page, or None if path is not valid."""
-        obj = self._get_object(path)
+        obj = self._get_user_ns_object(path)
         if obj is not None:
             page_name = _fully_qualified_name(obj)
         else:
-            page_name = None
+            obj = pydoc.locate(path)
+            if obj is not None:
+                page_name = path
+            else:
+                page_name = None
         return page_name
 
-    def _get_object(self, path):
-        """Return object, or None if the object does not exist."""
+    def _get_user_ns_object(self, path):
         parts = [part for part in path.split('.') if part]
         if parts[0] in self.shell.user_ns:
             obj = self.shell.user_ns[parts[0]]
             if parts[1:]:
                 obj = _getattr_path(obj, parts[1:])
         else:
-            obj = pydoc.locate(path)
+            obj = None
         return obj
 
     @property

@@ -479,3 +479,14 @@ def test_fully_qualified_name_type():
     result = _url_name(newtab)
     expected = 'int'
     nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_path_attribute_no_module():
+    #Test of path to attribute ('mro') not defined in a module
+
+    newtab = get_newtabmagic(browser='firefox')
+    assert 'IPython' not in newtab.shell.user_ns
+    newtab.newtab('IPython.core.debugger.Tracer.mro')
+    result = _url_name(newtab)
+    expected = 'IPython.core.debugger.Tracer.mro'
+    nose.tools.assert_equals(result, expected)

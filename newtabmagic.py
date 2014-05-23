@@ -364,29 +364,42 @@ def _qualname32(obj):
             except AttributeError:
                 return type(obj).__name__
 
+
+def _qualname27_builtin(obj):
+    """Qualified name for builtin functions and methods, for Python 2.7."""
+    if obj.__self__ is not None:
+        # builtin methods
+        if hasattr(obj.__self__, '__name__'):
+            self_name = obj.__self__.__name__
+        else:
+            self_name = obj.__self__.__class__.__name__
+        return self_name + "." + obj.__name__
+    else:
+        # builtin function
+        return obj.__name__
+
+
 def _qualname27(obj, module_name):
-    """Qualified name, not including module name, Python 2.7."""
-    try:
+    """Qualified name, not including module name, for Python 2.7."""
+    if inspect.isbuiltin(obj):
+        return _qualname27_builtin(obj)
+    elif inspect.isclass(obj):
+        return obj.__name__
+    elif inspect.isfunction(obj):
+        return obj.__name__
+    elif inspect.ismethod(obj):
+        attr = obj.__name__
+        # loop through base classes looking for class where
+        # attr is defined.
+        for base_class in obj.im_class.mro():
+            qual_name = base_class.__name__ + '.' + attr
+            if pydoc.locate(module_name + '.' + qual_name):
+                return qual_name
+    elif inspect.ismethoddescriptor(obj):
         return obj.__objclass__.__name__ + "." + obj.__name__
-    except AttributeError:
-        try:
-            attr = obj.__name__
-            # loop through base classes looking for class where
-            # attr is defined.
-            for base_class in obj.im_class.mro():
-                qual_name = base_class.__name__ + '.' + attr
-                if pydoc.locate(module_name + '.' + qual_name):
-                    return qual_name
-        except AttributeError:  # no im_class
-            try:
-                if obj.__self__ is not None:
-                    return obj.__self__.__class__.__name__ + "." + obj.__name__
-            except AttributeError: # no __self__
-                pass
-            try:
-                return obj.__name__
-            except AttributeError:
-                return type(obj).__name__
+    else:
+        return type(obj).__name__
+
 
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the

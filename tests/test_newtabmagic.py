@@ -491,3 +491,16 @@ def test_name_argument_path_attribute_no_module():
     result = _url_name(newtab)
     expected = 'IPython.core.debugger.Tracer.mro'
     nose.tools.assert_equals(result, expected)
+
+
+@skipif(sys.version_info[:2] == (3, 2))
+def test_name_argument_object_module_is_None():
+    # Test of name argument object, __module__ attribute is None.
+
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('import newtabmagic')
+    newtab.shell.run_cell('f = newtabmagic.NewTabMagics.mro')
+    newtab.newtab('f')
+    result = _url_name(newtab)
+    expected = 'newtabmagic.NewTabMagics.mro'
+    nose.tools.assert_equals(result, expected)

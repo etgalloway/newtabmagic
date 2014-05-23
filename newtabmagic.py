@@ -422,6 +422,8 @@ def _get_module_name(object_):
     """Return module name of object, or module name of object's class."""
     try:
         name = object_.__module__
+        if name is None:
+            name = object_.__self__.__module__
     except AttributeError:
         name = object_.__class__.__module__
     return name

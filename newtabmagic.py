@@ -388,13 +388,12 @@ def _qualname27(obj, module_name):
     elif inspect.isfunction(obj):
         return obj.__name__
     elif inspect.ismethod(obj):
-        attr = obj.__name__
+        im_name = obj.__name__
         # loop through base classes looking for class where
-        # attr is defined.
-        for base_class in obj.im_class.mro():
-            qual_name = base_class.__name__ + '.' + attr
-            if pydoc.locate(module_name + '.' + qual_name):
-                return qual_name
+        # instance method is defined.
+        for base in inspect.getmro(obj.im_class):
+            if im_name in base.__dict__:
+                return base.__name__ + '.' + im_name
     elif inspect.ismethoddescriptor(obj):
         return obj.__objclass__.__name__ + "." + obj.__name__
     else:

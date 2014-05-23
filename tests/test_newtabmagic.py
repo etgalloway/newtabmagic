@@ -53,6 +53,7 @@ def server_running(newtab):
 
 def get_newtabmagic(new_tabs_enabled=False, browser=None, port=None):
     ip = IPython.get_ipython()
+    ip.reset()
     newtab = newtabmagic.NewTabMagics(ip)
     newtab.new_tabs_enabled = new_tabs_enabled
     if browser is not None:

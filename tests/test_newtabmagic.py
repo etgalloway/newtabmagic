@@ -464,7 +464,7 @@ def test_fully_qualified_name_objclass_attribute():
 def test_fully_qualified_name_self_attribute():
     # In Python 2.7, object has __self__ attribute
     newtab = get_newtabmagic(browser='firefox')
-    newtab.shell.run_cell('f = ''.split')
+    newtab.shell.run_cell('f = "".split')
     newtab.newtab('f')
     result = _url_name(newtab)
     expected = 'str.split'

@@ -394,7 +394,7 @@ def _qualname27(obj, module_name):
         for base in inspect.getmro(obj.im_class):
             if im_name in base.__dict__:
                 return base.__name__ + '.' + im_name
-    elif inspect.ismethoddescriptor(obj):
+    elif hasattr(obj, '__objclass__'):
         return obj.__objclass__.__name__ + "." + obj.__name__
     else:
         return type(obj).__name__

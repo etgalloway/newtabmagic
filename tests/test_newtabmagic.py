@@ -504,3 +504,15 @@ def test_name_argument_object_module_is_None():
     result = _url_name(newtab)
     expected = 'newtabmagic.NewTabMagics.mro'
     nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_object_method_wrapper():
+    # Test needed for Python 2.7
+    # In CPython, type([].__add__).__name__ == 'method-wrapper'
+
+    newtab = get_newtabmagic(browser='firefox')
+    newtab.shell.run_cell('f = [].__add__')
+    newtab.newtab('f')
+    result = _url_name(newtab)
+    expected = 'list.__add__'
+    nose.tools.assert_equals(result, expected)

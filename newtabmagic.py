@@ -339,41 +339,38 @@ def _get_module_name(object_):
 
 def _qualname(obj, module_name):
     """Qualified name not including module name."""
-
-    if sys.version_info >= (3, 3):
-        return _qualname33(obj)
-    elif sys.version_info >= (3, 0):
-        return _qualname32(obj)
+    if sys.version_info >= (3,):
+        return _qualname_py3(obj)
     else:
         return _qualname27(obj, module_name)
 
 
-def _qualname33(obj):
-    """Qualified name, not including module name, for Python 3.3+."""
-    try:
+def _qualname_py3(obj):
+    """Qualified name, not including module name, for Python 3."""
+
+    if hasattr(obj, "undecorated"):
         return obj.undecorated.__qualname__
-    except AttributeError:
-        try:
-            return obj.__qualname__
-        except AttributeError:
-            return type(obj).__name__
 
-
-def _qualname32(obj):
-    """Qualified name, not including module name, for Python 3.0-3.2."""
-    try:
+    if hasattr(obj, '__objclass__'):
         return obj.__objclass__.__name__ + "." + obj.__name__
+
+    try:
+        return obj.__qualname__
     except AttributeError:
-        try:
-            if inspect.ismodule(obj.__self__):
-                return obj.__name__
-            else:
-                return obj.__self__.__class__.__name__ + "." + obj.__name__
-        except AttributeError:
-            try:
-                return obj.__name__
-            except AttributeError:
-                return type(obj).__name__
+        pass
+
+    if hasattr(obj, '__self__'):
+        if inspect.ismodule(obj.__self__):
+            return obj.__name__
+        else:
+            return obj.__self__.__class__.__name__ + "." + obj.__name__
+
+    try:
+        return obj.__name__
+    except AttributeError:
+        pass
+
+    return type(obj).__name__
 
 
 def _qualname27(obj, module_name):

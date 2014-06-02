@@ -320,9 +320,9 @@ def _fully_qualified_name(obj):
     else:
         module_name = _get_module_name(obj)
         if not module_name or module_name in builtins:
-            name = _qualname(obj, module_name)
+            name = _qualname(obj)
         else:
-            name = module_name + '.' + _qualname(obj, module_name)
+            name = module_name + '.' + _qualname(obj)
     return name
 
 
@@ -337,12 +337,12 @@ def _get_module_name(object_):
     return name
 
 
-def _qualname(obj, module_name):
+def _qualname(obj):
     """Qualified name not including module name."""
     if sys.version_info >= (3,):
         return _qualname_py3(obj)
     else:
-        return _qualname27(obj, module_name)
+        return _qualname27(obj)
 
 
 def _qualname_py3(obj):
@@ -373,7 +373,7 @@ def _qualname_py3(obj):
     return type(obj).__name__
 
 
-def _qualname27(obj, module_name):
+def _qualname27(obj):
     """Qualified name, not including module name, for Python 2.7."""
     if inspect.isbuiltin(obj):
         return _qualname27_builtin(obj)

@@ -313,21 +313,24 @@ def _fully_qualified_name(obj):
     """Returns fully qualified name, including module name, except for the
     built-in module."""
 
-    builtins = ['builtins', '__builtin__']
+    module_name = _get_module_name(obj)
 
     if inspect.ismodule(obj):
-        name = obj.__name__
+        name = module_name
     else:
-        module_name = _get_module_name(obj)
-        if not module_name or module_name in builtins:
-            name = _qualname(obj)
+        qualname = _qualname(obj)
+        if module_name in ['builtins', '__builtin__']:
+            name = qualname
         else:
-            name = module_name + '.' + _qualname(obj)
+            name = module_name + '.' + qualname
     return name
 
 
 def _get_module_name(object_):
     """Return module name of object, or module name of object's class."""
+    if inspect.ismodule(object_):
+        return object_.__name__
+
     try:
         name = object_.__module__
         if name is None:

@@ -326,6 +326,17 @@ def _fully_qualified_name(obj):
     return name
 
 
+def _get_module_name(object_):
+    """Return module name of object, or module name of object's class."""
+    try:
+        name = object_.__module__
+        if name is None:
+            name = object_.__self__.__module__
+    except AttributeError:
+        name = object_.__class__.__module__
+    return name
+
+
 def _qualname(obj, module_name):
     """Qualified name not including module name."""
 
@@ -365,20 +376,6 @@ def _qualname32(obj):
                 return type(obj).__name__
 
 
-def _qualname27_builtin(obj):
-    """Qualified name for builtin functions and methods, for Python 2.7."""
-    if obj.__self__ is not None:
-        # builtin methods
-        if hasattr(obj.__self__, '__name__'):
-            self_name = obj.__self__.__name__
-        else:
-            self_name = obj.__self__.__class__.__name__
-        return self_name + "." + obj.__name__
-    else:
-        # builtin function
-        return obj.__name__
-
-
 def _qualname27(obj, module_name):
     """Qualified name, not including module name, for Python 2.7."""
     if inspect.isbuiltin(obj):
@@ -400,6 +397,20 @@ def _qualname27(obj, module_name):
         return type(obj).__name__
 
 
+def _qualname27_builtin(obj):
+    """Qualified name for builtin functions and methods, for Python 2.7."""
+    if obj.__self__ is not None:
+        # builtin methods
+        if hasattr(obj.__self__, '__name__'):
+            self_name = obj.__self__.__name__
+        else:
+            self_name = obj.__self__.__class__.__name__
+        return self_name + "." + obj.__name__
+    else:
+        # builtin function
+        return obj.__name__
+
+
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.
@@ -417,17 +428,6 @@ def _getattr_path(obj, attrs):
     return obj
 
 
-def _get_module_name(object_):
-    """Return module name of object, or module name of object's class."""
-    try:
-        name = object_.__module__
-        if name is None:
-            name = object_.__self__.__module__
-    except AttributeError:
-        name = object_.__class__.__module__
-    return name
-
-
 def _stop_process(p, name):
     """Stop process, by applying terminate and kill."""
     # Based on code in IPython.core.magics.script.ScriptMagics.shebang
@@ -441,7 +441,6 @@ def _stop_process(p, name):
         return
     p.kill()
     print("{} is killed.".format(name))
-
 
 
 class HtmlHandler(tornado.web.RequestHandler):

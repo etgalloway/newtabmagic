@@ -342,7 +342,7 @@ def _qualname(obj):
     if sys.version_info >= (3,):
         return _qualname_py3(obj)
     else:
-        return _qualname27(obj)
+        return _qualname_py2(obj)
 
 
 def _qualname_py3(obj):
@@ -373,23 +373,22 @@ def _qualname_py3(obj):
     return type(obj).__name__
 
 
-def _qualname27(obj):
+def _qualname_py2(obj):
     """Qualified name, not including module name, for Python 2.7."""
     if inspect.isbuiltin(obj):
-        return _qualname27_builtin(obj)
-    elif inspect.isclass(obj):
-        return obj.__name__
-    elif inspect.isfunction(obj):
-        return obj.__name__
+        return _qualname_builtin_py2(obj)
     elif hasattr(obj, 'im_class'):
         return obj.im_class.__name__ + '.' + obj.__name__
     elif hasattr(obj, '__objclass__'):
         return obj.__objclass__.__name__ + "." + obj.__name__
     else:
-        return type(obj).__name__
+        try:
+            return obj.__name__
+        except AttributeError:
+            return type(obj).__name__
 
 
-def _qualname27_builtin(obj):
+def _qualname_builtin_py2(obj):
     """Qualified name for builtin functions and methods, for Python 2.7."""
     if obj.__self__ is not None:
         # builtin methods

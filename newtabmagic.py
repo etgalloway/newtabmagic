@@ -384,13 +384,8 @@ def _qualname27(obj, module_name):
         return obj.__name__
     elif inspect.isfunction(obj):
         return obj.__name__
-    elif inspect.ismethod(obj):
-        im_name = obj.__name__
-        # loop through base classes looking for class where
-        # instance method is defined.
-        for base in inspect.getmro(obj.im_class):
-            if im_name in base.__dict__:
-                return base.__name__ + '.' + im_name
+    elif hasattr(obj, 'im_class'):
+        return obj.im_class.__name__ + '.' + obj.__name__
     elif hasattr(obj, '__objclass__'):
         return obj.__objclass__.__name__ + "." + obj.__name__
     else:

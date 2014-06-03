@@ -517,3 +517,13 @@ def test_name_argument_object_method_wrapper():
     result = _url_name(newtab)
     expected = 'list.__add__'
     nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_object_instance_method():
+
+    newtab = _get_newtabmagic()
+    newtab.shell.run_cell('im=get_ipython')
+    newtab.newtab('im')
+    result = _url_name(newtab)
+    expected = 'IPython.terminal.interactiveshell.TerminalInteractiveShell.get_ipython'
+    nose.tools.assert_equals(result, expected)

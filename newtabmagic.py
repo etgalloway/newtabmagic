@@ -329,14 +329,19 @@ def _fully_qualified_name(obj):
 def _get_module_name(object_):
     """Return module name of object, or module name of object's class."""
     if inspect.ismodule(object_):
-        return object_.__name__
-
-    try:
-        name = object_.__module__
-        if name is None:
+        name = object_.__name__
+    elif inspect.ismethod(object_):
+        try:
+            name = object_.im_class.__module__
+        except AttributeError:
             name = object_.__self__.__module__
-    except AttributeError:
-        name = object_.__class__.__module__
+    else:
+        try:
+            name = object_.__module__
+            if name is None:
+                name = object_.__self__.__module__
+        except AttributeError:
+            name = object_.__class__.__module__
     return name
 
 
@@ -353,6 +358,9 @@ def _qualname_py3(obj):
 
     if hasattr(obj, "undecorated"):
         return obj.undecorated.__qualname__
+
+    if inspect.ismethod(obj):
+        return obj.__self__.__class__.__name__ + '.' + obj.__func__.__name__
 
     if hasattr(obj, '__objclass__'):
         return obj.__objclass__.__name__ + "." + obj.__name__

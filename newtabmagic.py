@@ -34,7 +34,6 @@ Sample Usage
         In [9]: # random \
         ...: %newtab --show
         browser: firefox
-        content-type: html
         server pid: 3096
         server poll: None
         server running: True
@@ -79,8 +78,6 @@ class NewTabMagics(Magics):
 
     def __init__(self, shell):
         super(NewTabMagics, self).__init__(shell)
-        self._content_type = 'html'
-        self._content_types = ['html', 'text']
         self._browser = None
         self._server = ServerProcess()
         self.new_tabs_enabled = True
@@ -113,11 +110,6 @@ class NewTabMagics(Magics):
         help='Show state of magic.',
         action='store_true'
     )
-    @argument(
-        '--content-type',
-        choices=['text', 'html'],
-        help='Set content type of files opened in new tabs.'
-    )
     def newtab(self, line):
         """Line magic for opening new browser tabs."""
 
@@ -134,9 +126,6 @@ class NewTabMagics(Magics):
 
         if args.browser:
             self.browser = args.browser
-
-        if args.content_type:
-            self._content_type = args.content_type
 
         if args.names:
             if self._browser:
@@ -229,7 +218,6 @@ class NewTabMagics(Magics):
         """Show state of magic."""
         msg = ''
         msg += 'browser: {}\n'.format(self._browser)
-        msg += 'content-type: {}\n'.format(self._content_type)
         print(msg, end='')
         self._server.show()
 
@@ -239,12 +227,8 @@ class NewTabMagics(Magics):
 
     def _pydoc_url(self, page):
         """Return url for pydoc help page."""
-        root = self._server.url()
-        if self._content_type == 'html':
-            url = root + page + '.html'
-        else:
-            url = root + page + '.txt'
-        return url
+        return self.base_url() + page + '.html'
+
 
 class ServerProcess(object):
     """Class for the newtabmagic server process."""

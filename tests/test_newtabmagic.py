@@ -106,36 +106,6 @@ def test_set_port_server_running():
     nose.tools.assert_equals(result, expected)
 
 
-def test_set_content_type():
-
-    newtab = _get_newtabmagic()
-
-    # default is 'html'
-    with stdout_redirected() as out:
-        newtab.newtab('--show')
-    output = out.getvalue()
-    assert 'content-type: html' in output
-
-    # switch to 'text'
-    with stdout_redirected() as out:
-        newtab.newtab('--content-type text')
-        newtab.newtab('--show')
-    output = out.getvalue()
-    assert 'content-type: text' in output
-
-    # switch to 'html'
-    with stdout_redirected() as out:
-        newtab.newtab('--content-type html')
-        newtab.newtab('--show')
-    output = out.getvalue()
-    assert 'content-type: html' in output
-
-    # invalid content type
-    nose.tools.assert_raises(
-        IPython.core.error.UsageError,
-        newtab.newtab, '--content-type invalid')
-
-
 def test_server_start_stop():
 
     newtab = _get_newtabmagic(browser=None)
@@ -211,7 +181,6 @@ def test_show():
 
     result = out.getvalue()
     expected = "\n".join(['browser: firefox',
-                'content-type: html',
                 'server running: False',
                 'server port: 8888',
                 'server root url: http://127.0.0.1:8888/',
@@ -224,7 +193,6 @@ def test_show():
             newtab.newtab('--show')
 
     expected = ['browser: firefox',
-                'content-type: html',
                 'server poll: None',
                 'server running: True',
                 'server port: 8888',
@@ -311,34 +279,12 @@ def test_name_argument_nonexistent_browser():
         newtab.newtab, 'sys')
 
 
-def test_name_argument_content_type():
-
-    browser = 'firefox'
-    newtab = _get_newtabmagic(browser=browser)
-    url = newtab.base_url()
-
-    newtab.newtab('--content-type html')
-    newtab.newtab('sys')
-    result = newtab.command_lines
-    expected = [[browser, url + 'sys.html']]
-    assert result == expected
-
-    newtab.newtab('--content-type text')
-    newtab.newtab('sys')
-    result = newtab.command_lines
-    expected = [[browser, url + 'sys.txt']]
-    assert result == expected
-
-
 def _url_name(newtab):
     """Return name part of url."""
     url = newtab.command_lines[0][1]
     path = urlparse(url).path
-    # drop leading '/' and trailing extension
-    if path.endswith('.html'):
-        return path[1:-5]
-    elif path.endswith('.txt'):
-        return path[1:-4]
+    # drop leading '/' and trailing '.html'
+    return path[1:-5]
 
 
 def test_name_argument_find_pydoc_url():

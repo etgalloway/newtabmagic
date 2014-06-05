@@ -432,43 +432,21 @@ def _stop_process(p, name):
 class HtmlHandler(tornado.web.RequestHandler):
     """Handler for html pages."""
     def get(self):
-        page = get_html(self.request.uri)
+        page = pydoc._url_handler(self.request.uri)  # pylint: disable=W0212
         self.write(page)
 
 
 class TextHandler(tornado.web.RequestHandler):
     """Handler for plain text pages."""
     def get(self):
-        page = get_text(self.request.uri)
+        # remove leading '/' and trailing '.txt'
+        path = self.request.uri[1:-4]
+        try:
+            page = pydoc.render_doc(path, renderer=pydoc.plaintext)
+        except (ImportError, pydoc.ErrorDuringImport):
+            raise tornado.web.HTTPError(404)
         self.set_header("Content-Type", "text/plain")
-        self.write(page)
-
-
-def get_html(url):
-    """Get method for HTML pages."""
-    page = pydoc._url_handler(url)  # pylint: disable=W0212
-    return page
-
-
-def get_text(uri):
-    """Get method for plain text pages."""
-    path = uri[1:-4]  # remove leading '/' and trailing '.txt'
-    page = pydoc_text_help(path)
-    return page
-
-
-def pydoc_text_help(path):
-    """Returns a pydoc help page in plain text for the object
-    referred to by path.
-
-    Keyword Arguments:
-    path -- an object name or a dotted path to an object
-    """
-    try:
-        page = pydoc.render_doc(path, renderer=pydoc.plaintext)
-    except (ImportError, pydoc.ErrorDuringImport):
-        raise tornado.web.HTTPError(404)
-    return page.encode('utf-8')
+        self.write(page.encode('utf-8'))
 
 
 def web_application():

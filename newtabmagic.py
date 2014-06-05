@@ -446,14 +446,7 @@ class TextHandler(tornado.web.RequestHandler):
 
 def get_html(url):
     """Get method for HTML pages."""
-    if sys.version_info[0] >= 3:
-        page = pydoc._url_handler(url)  # pylint: disable=W0212
-    else:
-        if url.endswith('.html'):
-            page = pydoc_html_help(url[1:-5])
-        elif url == '/':
-            # index page is not available for Python 2
-            page = "Index page not available"
+    page = pydoc._url_handler(url)  # pylint: disable=W0212
     return page
 
 
@@ -461,25 +454,6 @@ def get_text(uri):
     """Get method for plain text pages."""
     path = uri[1:-4]  # remove leading '/' and trailing '.txt'
     page = pydoc_text_help(path)
-    return page
-
-
-def pydoc_html_help(path):
-    """Returns a pydoc help page in html for the object referred
-    to by path.
-
-    Keyword Arguments:
-    path -- an object name or a dotted path to an object
-
-    Reference: pydoc.writedoc
-
-    """
-    try:
-        obj, name = pydoc.resolve(path)
-        html_doc = pydoc.html.document(obj, name)
-        page = pydoc.html.page(pydoc.describe(obj), html_doc)
-    except (ImportError, pydoc.ErrorDuringImport):
-        raise tornado.web.HTTPError(404)
     return page
 
 
@@ -491,10 +465,7 @@ def pydoc_text_help(path):
     path -- an object name or a dotted path to an object
     """
     try:
-        if sys.version_info[0] == 2:
-            page = pydoc.plain(pydoc.render_doc(path))
-        else:
-            page = pydoc.render_doc(path, renderer=pydoc.plaintext)
+        page = pydoc.render_doc(path, renderer=pydoc.plaintext)
     except (ImportError, pydoc.ErrorDuringImport):
         raise tornado.web.HTTPError(404)
     return page.encode('utf-8')

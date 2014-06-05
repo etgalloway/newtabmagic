@@ -500,15 +500,19 @@ def pydoc_text_help(path):
     return page.encode('utf-8')
 
 
-def start_server(port):
-    """Starts the newtab server on the given port."""
-    application = tornado.web.Application([
+def web_application():
+    """Return web application."""
+    return tornado.web.Application([
         (r'/', HtmlHandler),
         (r'/[\w\.]*.html', HtmlHandler),
         (r'/[\w\.]*.txt', TextHandler),
     ])
-    application.listen(port)
 
+
+def start_server(port):
+    """Starts the newtab server on the given port."""
+    application = web_application()
+    application.listen(port)
     tornado.ioloop.IOLoop.instance().start()
 
 

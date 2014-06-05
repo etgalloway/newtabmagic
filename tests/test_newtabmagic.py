@@ -15,6 +15,7 @@ import IPython
 import newtabmagic
 
 from IPython.testing.decorators import skipif
+from tornado.testing import AsyncHTTPTestCase
 
 if sys.version_info.major == 2:
     from StringIO import StringIO
@@ -473,3 +474,25 @@ def test_name_argument_object_instance_method():
     result = _url_name(newtab)
     expected = 'IPython.terminal.interactiveshell.TerminalInteractiveShell.get_ipython'
     nose.tools.assert_equals(result, expected)
+
+
+class WebApplicationTest(AsyncHTTPTestCase):
+    def get_app(self):
+        return newtabmagic.web_application()
+
+    @skipif(sys.version_info[0] == 2)
+    def test_index(self):
+        response = self.fetch('/')
+        assert b'Pydoc: Index of Modules' in response.body
+
+    @skipif(sys.version_info[0] == 2)
+    def test_text(self):
+        response = self.fetch('/sys.txt')
+        assert b'built-in module sys' in response.body
+
+    @skipif(sys.version_info[0] == 2)
+    def test_404(self):
+        response = self.fetch('/page_does_not_exist.txt')
+        expected = ('<html><title>404: Not Found</title>'
+                   '<body>404: Not Found</body></html>')
+        assert response.body.decode() == expected

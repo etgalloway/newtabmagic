@@ -519,18 +519,23 @@ def start_server(port):
 def start_server_background(port):
     """Start the newtab server server as a background process."""
 
+    if sys.version_info[0] == 2:
+        lines = ('import pydoc\n'
+                 'pydoc.serve({port})')
+        cell = lines.format(port=port)
+    else:
+        # Add location of newtabmagic (normally $IPYTHONDIR/extensions)
+        # to sys.path (not included by default).
+        module = 'newtabmagic'
+        path = repr(os.path.dirname(os.path.realpath(__file__)))
+        lines = ('import sys\n'
+                 'sys.path.append({path})\n'
+                 'import {module}\n'
+                 '{module}.start_server({port})')
+        cell = lines.format(path=path, module=module, port=port)
+
     # Using script cell magic so that shutting down
     # IPython stops the server process.
-
-    module = 'newtabmagic'
-    path = repr(os.path.dirname(os.path.realpath(__file__)))
-
-    lines = ('import sys\n'
-             'sys.path.append({path})\n'
-             'import {module}\n'
-             '{module}.start_server({port})')
-    cell = lines.format(path=path, module=module, port=port)
-
     line = "python --proc proc --bg"
     ip = get_ipython()
     ip.run_cell_magic("script", line, cell)

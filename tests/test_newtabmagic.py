@@ -206,7 +206,7 @@ def test_show():
 
 
 def test_newtab_name_argument():
-    # test for a single name argument
+    # Test for a single name argument
 
     browser = 'firefox'
     newtab = _get_newtabmagic(browser=browser)
@@ -224,7 +224,7 @@ def test_newtab_name_argument():
 
 
 def test_newtab_name_arguments():
-    #test for multiple name arguments
+    # Test for multiple name arguments
 
     browser = 'firefox'
     newtab = _get_newtabmagic(browser=browser)
@@ -288,9 +288,8 @@ def _url_name(newtab):
     return path[1:-5]
 
 
-def test_name_argument_find_pydoc_url():
-    # Tests to make sure that pydoc urls are
-    # found for name strings.
+def test_name_argument_dotted_path():
+    # Tests of name arguments which are paths not objects.
 
     newtab = _get_newtabmagic()
 
@@ -331,28 +330,29 @@ def test_name_argument_find_pydoc_url():
     nose.tools.assert_equals(newtab.command_lines, [])
 
 
-def test_fully_qualified_name_module():
-    # object is a module
+def test_name_argument_object_module():
+    # Object is a module
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('import sys')
-    newtab.newtab('sys')
+    newtab.shell.run_cell('o = sys')
+    newtab.newtab('o')
     result = _url_name(newtab)
     expected = 'sys'
     nose.tools.assert_equals(result, expected)
 
 
-def test_fully_qualified_name_module_unavailable():
-    # "".split.__module__ is None
+def test_name_argument_object_no_module_attribute():
+    # Object does not have a '__module__' attribute
     newtab = _get_newtabmagic()
-    newtab.shell.run_cell('f = "".split')
+    newtab.shell.run_cell('f = str.split')
     newtab.newtab('f')
     result = _url_name(newtab)
     expected = 'str.split'
     nose.tools.assert_equals(result, expected)
 
 
-def test_fully_qualified_name_builtin_module():
-    # object is defined in the 'builtin' module
+def test_name_object_builtin_function():
+    # Object module attribute is 'builtins' or '__builtin__'
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('f = len')
     newtab.newtab('f')
@@ -361,8 +361,8 @@ def test_fully_qualified_name_builtin_module():
     nose.tools.assert_equals(result, expected)
 
 
-def test_fully_qualified_name_not_builtin_module():
-    # object is defined in a module other than 'builtin'
+def test_name_argument_object_is_not_builtin():
+    # Object is not defined in the builtin module.
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('import sys')
     newtab.shell.run_cell('f=sys.settrace')
@@ -371,8 +371,9 @@ def test_fully_qualified_name_not_builtin_module():
     expected = 'sys.settrace'
     nose.tools.assert_equals(result, expected)
 
-@skipif(sys.version_info[:2] == (3, 2))
-def test_full_name_decorated_function():
+
+@skipif(sys.version_info[:2] == (3, 2), "Python 3.2 Failure")
+def test_name_argument_decorated_object():
     # In Python 3.3, object has an undecorated.__qualname__ attribute
     # In Python 2.7, object has an im_class attribute
     newtab = _get_newtabmagic()
@@ -384,22 +385,7 @@ def test_full_name_decorated_function():
     nose.tools.assert_equals(result, expected)
 
 
-def test_fully_qualified_name_qualname_attribute():
-    # In Python 3.3, object has __qualname__ attribute
-    # In Python 3.2, object has __name__ attribute
-    # In Python 2.7, object has __name__ attribute
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('import sys')
-    newtab.shell.run_cell('f = sys.settrace')
-    newtab.newtab('f')
-    result = _url_name(newtab)
-    expected = 'sys.settrace'
-    nose.tools.assert_equals(result, expected)
-
-
-@skipif(sys.version_info[:2] != (2, 7))
-def test_fully_qualified_name_objclass_attribute():
-    # In Python 2.7, object has __objclass__ attribute
+def test_name_argument_object_objclass_attribute():
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('f = str.split')
     newtab.newtab('f')
@@ -408,10 +394,8 @@ def test_fully_qualified_name_objclass_attribute():
     nose.tools.assert_equals(result, expected)
 
 
-@skipif(sys.version_info[:2] != (2, 7))
-def test_fully_qualified_name_self_attribute():
-    # In Python 2.7, object has __self__ attribute
-
+def test_name_argument_object_self_attribute():
+    # Test for Python 2.7
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('f = "".split')
     newtab.newtab('f')
@@ -420,8 +404,8 @@ def test_fully_qualified_name_self_attribute():
     nose.tools.assert_equals(result, expected)
 
 
-def test_fully_qualified_name_type():
-    # Object type has a __name__ attribute
+def test_name_argument_object_no_name_attribute():
+    # Object does not have a '__name__' attribute.
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('x = 0')
     newtab.newtab('x')
@@ -431,7 +415,7 @@ def test_fully_qualified_name_type():
 
 
 def test_name_argument_path_attribute_no_module():
-    #Test of path to attribute ('mro') not defined in a module
+    # Test of path to attribute ('mro') not defined in a module
 
     newtab = _get_newtabmagic()
     assert 'IPython' not in newtab.shell.user_ns
@@ -441,9 +425,9 @@ def test_name_argument_path_attribute_no_module():
     nose.tools.assert_equals(result, expected)
 
 
-@skipif(sys.version_info[:2] == (3, 2))
-def test_name_argument_object_module_is_None():
-    # Test of name argument object, __module__ attribute is None.
+@skipif(sys.version_info[:2] == (3, 2), "Python 3.2 Failure")
+def test_name_argument_object_attribute_no_module():
+    # Test of object attribute ('mro') not defined in a module
 
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('import newtabmagic')
@@ -456,6 +440,7 @@ def test_name_argument_object_module_is_None():
 
 def test_name_argument_object_method_wrapper():
     # Test needed for Python 2.7
+    # [].__add__ has an __objclass__ attribute
     # In CPython, type([].__add__).__name__ == 'method-wrapper'
 
     newtab = _get_newtabmagic()

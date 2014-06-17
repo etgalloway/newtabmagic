@@ -3,7 +3,7 @@ Command Line Usage:
     python -m IPython start_magic.py -i
   
 Interactive Usage:
-    In [1]: from start_newtabmagic import *
+    In [1]: %run start_newtabmagic.ipy
     Starting job # 0 in a separate thread.
     Server running at http://127.0.0.1:8889/
 

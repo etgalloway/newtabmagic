@@ -178,6 +178,9 @@ class NewTabMagics(Magics):
         return page_name
 
     def _get_user_ns_object(self, path):
+        """Get object associated with path, provided the first
+        part of the path is the name of an object in the user
+        namespace.  Return None if the object does not exist."""
         parts = [part for part in path.split('.') if part]
         if parts[0] in self.shell.user_ns:
             obj = self.shell.user_ns[parts[0]]
@@ -199,7 +202,7 @@ class NewTabMagics(Magics):
 
     @browser.setter
     def browser(self, args):
-        """Set browser by name or path."""
+        """Set browser by command name or path."""
         path = ' '.join(args).strip('\'\"')
         self._browser = path
 
@@ -466,15 +469,15 @@ def start_server(port):
 
 
 def start_server_background(port):
-    """Start the newtab server server as a background process."""
+    """Start the newtab server as a background process."""
 
     if sys.version_info[0] == 2:
         lines = ('import pydoc\n'
                  'pydoc.serve({port})')
         cell = lines.format(port=port)
     else:
-        # Add location of newtabmagic (normally $IPYTHONDIR/extensions)
-        # to sys.path (not included by default).
+        # The location of newtabmagic (normally $IPYTHONDIR/extensions)
+        # needs to be added to sys.path.
         module = 'newtabmagic'
         path = repr(os.path.dirname(os.path.realpath(__file__)))
         lines = ('import sys\n'

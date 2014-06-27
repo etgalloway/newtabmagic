@@ -56,8 +56,6 @@ import pydoc
 import sys
 import subprocess
 import time
-import tornado.ioloop
-import tornado.web
 
 
 from IPython import get_ipython
@@ -432,40 +430,18 @@ def _stop_process(p, name):
     print("{} is killed.".format(name))
 
 
-class HtmlHandler(tornado.web.RequestHandler):
-    """Handler for html pages."""
-    def get(self):
-        page = pydoc._url_handler(self.request.uri)  # pylint: disable=W0212
-        self.write(page)
-
-
-class TextHandler(tornado.web.RequestHandler):
-    """Handler for plain text pages."""
-    def get(self):
-        # remove leading '/' and trailing '.txt'
-        path = self.request.uri[1:-4]
-        try:
-            page = pydoc.render_doc(path, renderer=pydoc.plaintext)
-        except (ImportError, pydoc.ErrorDuringImport):
-            raise tornado.web.HTTPError(404)
-        self.set_header("Content-Type", "text/plain")
-        self.write(page.encode('utf-8'))
-
-
-def web_application():
-    """Return web application."""
-    return tornado.web.Application([
-        (r'/', HtmlHandler),
-        (r'/[\w\.]*.html', HtmlHandler),
-        (r'/[\w\.]*.txt', TextHandler),
-    ])
-
-
-def start_server(port):
-    """Starts the newtab server on the given port."""
-    application = web_application()
-    application.listen(port)
-    tornado.ioloop.IOLoop.instance().start()
+def pydoc_cli_monkey_patched(port):
+    """In Python 3, run pydoc.cli with builtins.input monkey-patched
+    so that pydoc can be run as a process.
+    """
+    import builtins
+    def input(_): # pylint: disable=W0622
+        """Monkey-patched version of builtins.input"""
+        while 1:
+            time.sleep(1.0)
+    builtins.input = input
+    sys.argv += ["-p", port]
+    pydoc.cli()
 
 
 def start_server_background(port):
@@ -478,16 +454,15 @@ def start_server_background(port):
     else:
         # The location of newtabmagic (normally $IPYTHONDIR/extensions)
         # needs to be added to sys.path.
-        module = 'newtabmagic'
         path = repr(os.path.dirname(os.path.realpath(__file__)))
         lines = ('import sys\n'
                  'sys.path.append({path})\n'
-                 'import {module}\n'
-                 '{module}.start_server({port})')
-        cell = lines.format(path=path, module=module, port=port)
+                 'import newtabmagic\n'
+                 'newtabmagic.pydoc_cli_monkey_patched({port})')
+        cell = lines.format(path=path, port=port)
 
-    # Using script cell magic so that shutting down
-    # IPython stops the server process.
+    # Use script cell magic so that shutting down IPython stops
+    # the server process.
     line = "python --proc proc --bg"
     ip = get_ipython()
     ip.run_cell_magic("script", line, cell)

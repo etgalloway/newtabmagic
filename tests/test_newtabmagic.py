@@ -458,3 +458,13 @@ def test_name_argument_object_instance_method():
     result = _url_name(newtab)
     expected = 'IPython.terminal.interactiveshell.TerminalInteractiveShell.get_ipython'
     nose.tools.assert_equals(result, expected)
+
+
+def test_ServerProcess_port():
+
+    process = newtabmagic.ServerProcess()
+    p, q = 8888, 9999
+    process.port = p
+    assert process.port == p
+    process.port = q
+    assert process.port == q

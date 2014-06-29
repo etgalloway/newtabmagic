@@ -68,6 +68,7 @@ from IPython.core.magic_arguments import (
     argument,
     magic_arguments,
     parse_argstring)
+from IPython import utils
 
 
 @magics_class
@@ -77,6 +78,7 @@ class NewTabMagics(Magics):
     def __init__(self, shell):
         super(NewTabMagics, self).__init__(shell)
         self._browser = None
+        self._file_uri_scheme = None
         self._server = ServerProcess()
         self.new_tabs_enabled = True
         self._cmds = []
@@ -108,6 +110,11 @@ class NewTabMagics(Magics):
         help='Show state of magic.',
         action='store_true'
     )
+    @argument(
+        '--file-uri-scheme',
+        help='Uri scheme used for file viewing.',
+        choices=['None', 'view-source']
+    )
     def newtab(self, line):
         """Line magic for opening new browser tabs."""
 
@@ -125,6 +132,12 @@ class NewTabMagics(Magics):
         if args.browser:
             self.browser = args.browser
 
+        if args.file_uri_scheme is not None:
+            if args.file_uri_scheme == 'None':
+                self._file_uri_scheme = None
+            else:
+                self._file_uri_scheme = args.file_uri_scheme
+
         if args.names:
             if self._browser:
                 self._open_new_tabs(args.names)
@@ -139,28 +152,42 @@ class NewTabMagics(Magics):
         """Open browser tabs for a list of variable names and paths."""
         self._cmds = []
         for name in names:
-            url, msg = self._get_url(name)
+            url = self._get_url(name)
             if not url:
-                print(msg)
+                print('No file or documentation found:', name)
             else:
                 cmd = [self._browser, url]
                 self._cmds.append(cmd)
                 self._open_new_tab(cmd)
 
     def _get_url(self, name):
-        """Get url associated with name, returning None if not found"""
-        return self._get_pydoc_url(name)
+        """Return url for file or pydoc help page. Return
+        None if url is not found."""
+        if name.endswith('.__file__'):
+            return self._url_module(name[:-len('.__file__')])
+        else:
+            url = self._url_pydoc(name)
+            if not url:
+                url = _url_filename(name)
+            return url
 
-    def _get_pydoc_url(self, name):
+    def _url_module(self, name):
+        """Return file url for module, returning None if module is not found."""
+        obj = self._get_user_ns_object(name)
+        if obj is None:
+            obj = pydoc.locate(name)
+            if obj is None:
+                return None
+        return _object_file_url(obj)
+
+    def _url_pydoc(self, name):
         """Get pydoc url for name of variable or path."""
-        msg = ''
         page = self._get_pydoc_page_name(name)
         if page:
-            url = self._pydoc_url(page)
+            url = self._page_pydoc_url(page)
         else:
             url = None
-            msg = 'Documentation not found: {}'.format(name)
-        return url, msg
+        return url
 
     def _get_pydoc_page_name(self, path):
         """Return name of pydoc page, or None if path is not valid."""
@@ -207,6 +234,10 @@ class NewTabMagics(Magics):
     def _open_new_tab(self, cmd):
         """Open a new browser tab by invoking a subprocess."""
         try:
+            # Add view source uri scheme to file uri
+            if self._file_uri_scheme:
+                if cmd[1].startswith('file:///'):
+                    cmd[1] = self._file_uri_scheme + ':' + cmd[1]
             if self.new_tabs_enabled:
                 # chromium browser writes to screen, so redirect
                 subprocess.Popen(cmd, stdout=subprocess.PIPE)
@@ -219,6 +250,7 @@ class NewTabMagics(Magics):
         """Show state of magic."""
         msg = ''
         msg += 'browser: {}\n'.format(self._browser)
+        msg += 'file uri scheme: {}\n'.format(self._file_uri_scheme)
         print(msg, end='')
         self._server.show()
 
@@ -226,7 +258,7 @@ class NewTabMagics(Magics):
         """Base url for newtabmagic server."""
         return self._server.url()
 
-    def _pydoc_url(self, page):
+    def _page_pydoc_url(self, page):
         """Return url for pydoc help page."""
         return self.base_url() + page + '.html'
 
@@ -292,6 +324,27 @@ class ServerProcess(object):
             self._port = port
         else:
             print('Server already running. Port number not changed')
+
+
+def _object_file_url(obj):
+    """Return url of file associated with object. Return
+    None if the file is not found."""
+    try:
+        filename = inspect.getsourcefile(obj)
+    except TypeError:
+        url = None
+    else:
+        url = _url_filename(filename)
+    return url
+
+
+def _url_filename(filename):
+    """Return url if file is found searching sys.path;  if search fails
+    return None."""
+    try:
+        return 'file:///' + utils.path.filefind(filename, sys.path)
+    except IOError:
+        return None
 
 
 def _fully_qualified_name(obj):

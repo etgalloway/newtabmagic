@@ -8,7 +8,9 @@ To run tests:
 '''
 # pylint: disable=C0111, C0321, R0903
 import contextlib
+import inspect
 import nose
+import os
 import sys
 
 import IPython
@@ -51,6 +53,15 @@ def server_running(newtab):
         newtab.newtab('--server stop')
 
 
+@contextlib.contextmanager
+def _sys_path_modified(path):
+    sys.path.insert(0, path)
+    try:
+        yield
+    finally:
+        sys.path.remove(path)
+
+
 def _get_newtabmagic(new_tabs_enabled=False, browser='firefox', port=None):
     ip = IPython.get_ipython()
     ip.reset()
@@ -61,6 +72,10 @@ def _get_newtabmagic(new_tabs_enabled=False, browser='firefox', port=None):
     if port is not None:
         newtab.newtab('--port ' + str(port))
     return newtab
+
+
+def _newtab_url(newtab):
+    return newtab.command_lines[0][1]
 
 
 def test_set_browser():
@@ -181,6 +196,7 @@ def test_show():
 
     result = out.getvalue()
     expected = "\n".join(['browser: firefox',
+                'file uri scheme: None',
                 'server running: False',
                 'server port: 8888',
                 'server root url: http://127.0.0.1:8888/',
@@ -193,6 +209,7 @@ def test_show():
             newtab.newtab('--show')
 
     expected = ['browser: firefox',
+                'file uri scheme: None',
                 'server poll: None',
                 'server running: True',
                 'server port: 8888',
@@ -250,7 +267,7 @@ def test_name_argument_doc_not_found():
         newtab.newtab('does.not.exist')
 
     result = out.getvalue()
-    expected = 'Documentation not found: does.not.exist\n'
+    expected = 'No file or documentation found: does.not.exist\n'
     nose.tools.assert_equals(result, expected)
 
 
@@ -468,3 +485,144 @@ def test_ServerProcess_port():
     assert process.port == p
     process.port = q
     assert process.port == q
+
+
+def test_name_argument_module_file_attribute():
+    # Module in user namespace with __file__ attribute
+
+    newtab = _get_newtabmagic()
+
+    module = newtabmagic
+    newtab.shell.run_cell('import newtabmagic')
+    newtab.shell.run_cell('mod = newtabmagic')
+    assert 'mod' in newtab.shell.user_ns
+    newtab.newtab('mod.__file__')
+    result = _newtab_url(newtab)
+    expected = 'file:///' + inspect.getsourcefile(module)
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_module_no_file_attribute():
+    # Module in user namespace lacks __file__ attribute
+
+    newtab = _get_newtabmagic()
+    newtab.shell.run_cell('import sys')
+    assert 'sys' in newtab.shell.user_ns
+
+    with stdout_redirected() as out:
+        newtab.newtab('sys.__file__')
+
+    result = out.getvalue()
+    expected = 'No file or documentation found: sys.__file__\n'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_module_not_in_user_name_space():
+
+    newtab = _get_newtabmagic()
+    assert 'IPython' not in newtab.shell.user_ns
+    newtab.newtab('IPython.__file__')
+    result = _newtab_url(newtab)
+    expected = 'file:///' + inspect.getsourcefile(IPython)
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_invalid_module_name():
+
+    newtab = _get_newtabmagic()
+
+    with stdout_redirected() as out:
+        newtab.newtab('invalid_name.__file__')
+
+    result = out.getvalue()
+    expected = 'No file or documentation found: invalid_name.__file__\n'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_file_in_current_directory():
+
+    newtab = _get_newtabmagic()
+
+    # Choose file in current directory
+    newtab.shell.run_cell('files = !ls [tn]*.py')
+    filename = newtab.shell.user_ns['files'][0]
+
+    # Unlike IPython, nose does not include '' in sys.path
+    with _sys_path_modified(""):
+        newtab.newtab(filename)
+        result = _newtab_url(newtab)
+
+    expected = 'file:///' + os.path.realpath(filename)
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_non_existent_file():
+
+    filename = 'file_does_not_exist.py'
+    assert not os.path.isfile(filename)
+
+    newtab = _get_newtabmagic()
+    with _sys_path_modified(""):
+        with stdout_redirected() as out:
+            newtab.newtab(filename)
+
+    result = out.getvalue()
+    expected = 'No file or documentation found: file_does_not_exist.py\n'
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_file_name_change_directory():
+    # Open file for viewing after changing current directory.
+
+    newtab = _get_newtabmagic()
+    # Temporarily change the current working directory to
+    # a directory not likely to contain 'newtabmagic.py'.
+    # Must change the cwd back to the original; otherwise
+    # test files imports (by coverage.py) will fail after
+    # this test is run.
+    newtab.shell.run_cell('oldpwd = %pwd')
+    newtab.shell.run_cell('newpwd = get_ipython().ipython_dir')
+    newtab.shell.run_cell('%cd $newpwd')
+    assert not os.path.isfile('newtabmagic.py')
+    newtab.newtab('newtabmagic.py')
+    newtab.shell.run_cell('%cd $oldpwd')
+
+    result = _newtab_url(newtab)
+    expected = 'file:///' + inspect.getsourcefile(newtabmagic)
+    nose.tools.assert_equals(result, expected)
+
+
+def test_name_argument_path_to_file():
+
+    newtab = _get_newtabmagic()
+    newtab.newtab('tests/test_newtabmagic.py')
+    result = _newtab_url(newtab)
+    expected = ('file:///' +
+        os.path.dirname(inspect.getsourcefile(newtabmagic)) +
+        os.path.sep + 'tests' + os.path.sep + 'test_newtabmagic.py')
+    nose.tools.assert_equals(result, expected)
+
+
+def test_file_uri_scheme_view_source():
+
+    newtab = _get_newtabmagic()
+    newtab.newtab('--file-uri-scheme None')
+    newtab.newtab('--file-uri-scheme view-source')
+    newtab.newtab('newtabmagic.py')
+
+    result = _newtab_url(newtab)
+    expected = 'view-source:file:///' + inspect.getsourcefile(newtabmagic)
+    nose.tools.assert_equals(result, expected)
+
+
+def test_file_uri_scheme_none():
+
+    newtab = _get_newtabmagic()
+
+    newtab.newtab('--file-uri-scheme view-source')
+    newtab.newtab('--file-uri-scheme None')
+    newtab.newtab('newtabmagic.py')
+
+    result = _newtab_url(newtab)
+    expected = 'file:///' + inspect.getsourcefile(newtabmagic)
+    nose.tools.assert_equals(result, expected)

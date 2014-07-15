@@ -85,17 +85,17 @@ startup script as an argument:
 
 .. code::
 
-    $ python -m IPython $IPYTHONDIR/extensions/start_newtabmagic.py -i
+    $ python -m IPython $IPYTHONDIR/extensions/newtabmagic_start.py -i
 
 Startup scripts can be run from within IPython:
 
 .. code::
 
     In [1]: import os
-    In [2]: %run {os.environ['IPYTHONDIR'] + '/extensions/start_newtabmagic.ipy'}
+    In [2]: %run {os.environ['IPYTHONDIR'] + '/extensions/newtabmagic_start.ipy'}
 
 Python startup scripts can also be imported:
 
 .. code::
 
-    In [1]: import extensions.start_newtabmagic
+    In [1]: import extensions.newtabmagic_start

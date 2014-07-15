@@ -11,5 +11,4 @@ Interactive Usage:
 %load_ext newtabmagic
 %newtab --port 8889
 %newtab --browser firefox
-%newtab --file-uri-scheme view-source
 %newtab --server start

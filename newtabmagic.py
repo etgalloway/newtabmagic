@@ -3,13 +3,13 @@
 NewTabmagic
 ===========
 
-Magics for opening new browser tabs.
+A magic that provides access to the pydoc web server.
 
 ============
 Sample Usage
 ============
 
-    Start magic:
+    To load and configure newtabmagic:
 
         In [1]: %load_ext newtabmagic
 
@@ -17,11 +17,13 @@ Sample Usage
 
         In [3]: %newtab --port 8889
 
+    To start the pydoc web server:
+
         In [4]: %newtab --server start
         Starting job # 0 in a separate thread.
         Server running at http://127.0.0.1:8889/
 
-    Open help pages in new browser tabs:
+    To open pydoc help pages:
 
         In [5]: %newtab IPython.core.debugger.Tracer
 
@@ -29,10 +31,9 @@ Sample Usage
         In [7]: Tracer = IPython.core.debugger.Tracer()
         In [8]: %newtab Tracer
 
-    Show state:
+    To show state:
 
-        In [9]: # random \
-        ...: %newtab --show
+        In [9]: %newtab --show
         browser: firefox
         server pid: 3096
         server poll: None
@@ -40,7 +41,7 @@ Sample Usage
         server port: 8889
         server root url: http://127.0.0.1:8889/
 
-    Stop server:
+    To stop the pydoc server:
 
         In [10]: %newtab --server stop
         Server process is terminated.
@@ -96,11 +97,11 @@ class NewTabMagics(Magics):
     @argument(
         '--port',
         type=int,
-        help='Set port used by the newtabmagic server.'
+        help='Set port used by the pydoc server.'
     )
     @argument(
         '--server',
-        help='Control the newtabmagic server.',
+        help='Interact with the pydoc server process.',
         choices=['stop', 'start']
     )
     @argument(
@@ -223,7 +224,7 @@ class NewTabMagics(Magics):
         self._server.show()
 
     def base_url(self):
-        """Base url for newtabmagic server."""
+        """Base url for pydoc server."""
         return self._server.url()
 
     def _pydoc_url(self, page):
@@ -232,7 +233,7 @@ class NewTabMagics(Magics):
 
 
 class ServerProcess(object):
-    """Class for the newtabmagic server process."""
+    """Wrapper for the web server process."""
 
     def __init__(self):
         self._process = None
@@ -435,6 +436,8 @@ def pydoc_cli_monkey_patched(port):
     so that pydoc can be run as a process.
     """
     import builtins
+    # Monkey-patch input so that input does not raise EOFError when
+    # called by pydoc.cli
     def input(_): # pylint: disable=W0622
         """Monkey-patched version of builtins.input"""
         while 1:

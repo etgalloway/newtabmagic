@@ -102,7 +102,7 @@ class NewTabMagics(Magics):
     @argument(
         '--server',
         help='Interact with the pydoc server process.',
-        choices=['stop', 'start']
+        choices=['stop', 'start', 'read']
     )
     @argument(
         '--show',
@@ -118,10 +118,7 @@ class NewTabMagics(Magics):
             self._server.port = args.port
 
         if args.server:
-            if args.server == 'start':
-                self._server.start()
-            elif args.server == 'stop':
-                self._server.stop()
+            self._server_interact(args.server)
 
         if args.browser:
             self.browser = args.browser
@@ -231,6 +228,17 @@ class NewTabMagics(Magics):
         """Return url for pydoc help page."""
         return self.base_url() + page + '.html'
 
+    def _server_interact(self, cmd):
+        """Interact with the pydoc server process."""
+        if cmd == 'start':
+            self._server.start()
+        elif cmd == 'stop':
+            self._server.stop()
+        elif cmd == 'read':
+            out, err = self._server.read()
+            print('Server stdout: {}'.format(out))
+            print('Server stderr: {}'.format(err))
+
 
 class ServerProcess(object):
     """Wrapper for the web server process."""
@@ -248,6 +256,17 @@ class ServerProcess(object):
             msg = 'Server already started\n'
         msg += 'Server running at {}'.format(self.url())
         print(msg)
+
+    def read(self):
+        """Read stdout and stdout pipes if process is no longer running."""
+        if self._process and self._process.poll() is not None:
+            ip = get_ipython()
+            err = ip.user_ns['error'].read().decode()
+            out = ip.user_ns['output'].read().decode()
+        else:
+            out = ''
+            err = ''
+        return out, err
 
     def stop(self):
         """Stop server process."""
@@ -466,7 +485,7 @@ def start_server_background(port):
 
     # Use script cell magic so that shutting down IPython stops
     # the server process.
-    line = "python --proc proc --bg"
+    line = "python --proc proc --bg --err error --out output"
     ip = get_ipython()
     ip.run_cell_magic("script", line, cell)
 

@@ -10,6 +10,7 @@ To run tests:
 import contextlib
 import nose
 import sys
+import time
 
 import IPython
 import newtabmagic
@@ -168,6 +169,35 @@ def test_server_already_stopped():
 
     expected = 'Server process is already stopped.\n'
     result = out.getvalue()
+    nose.tools.assert_equals(result, expected)
+
+
+def test_server_process_read():
+
+    newtab = _get_newtabmagic()
+
+    # Server not running
+    with stdout_redirected() as out:
+        newtab.newtab('--server read')
+    result = out.getvalue()
+    expected = 'Server stdout: \nServer stderr: \n'
+    nose.tools.assert_equals(result, expected)
+
+    # Server running
+    with server_running(newtab):
+        time.sleep(1.0)
+        with stdout_redirected() as out:
+            newtab.newtab('--server read')
+    result = out.getvalue()
+    expected = 'Server stdout: \nServer stderr: \n'
+    nose.tools.assert_equals(result, expected)
+
+    # Server stopped
+    with stdout_redirected() as out:
+        newtab.newtab('--server read')
+
+    result = out.getvalue()
+    expected = 'Server stdout: \nServer stderr: \n'
     nose.tools.assert_equals(result, expected)
 
 

@@ -9,6 +9,7 @@ To run tests:
 # pylint: disable=C0111, C0321, R0903
 import contextlib
 import nose
+import socket
 import sys
 import time
 
@@ -60,6 +61,12 @@ def _get_newtabmagic(new_tabs_enabled=False, browser='firefox', port=None):
     if browser is not None:
         newtab.newtab('--browser ' + browser)
     if port is not None:
+        newtab.newtab('--port ' + str(port))
+    else:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        port = 0
+        s.bind(('', port))
+        _, port = s.getsockname()
         newtab.newtab('--port ' + str(port))
     return newtab
 

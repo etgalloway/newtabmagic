@@ -51,6 +51,8 @@ Sample Usage
 """
 from __future__ import print_function
 
+__version__ = '0.1'
+
 import inspect
 import os
 import pydoc

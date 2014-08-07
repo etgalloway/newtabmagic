@@ -104,7 +104,7 @@ def test_set_port_server_running():
     root_original = newtab.base_url()
     with server_running(newtab):
         with stdout_redirected() as out:
-            newtab.newtab('--port 8888')
+            newtab.newtab('--port 8880')
 
     result = out.getvalue()
     expected = 'Server already running. Port number not changed\n'
@@ -210,7 +210,7 @@ def test_server_process_read():
 
 def test_show():
 
-    newtab = _get_newtabmagic(browser='firefox', port=8888)
+    newtab = _get_newtabmagic(browser='firefox', port=8880)
 
     # Server not running
     with stdout_redirected() as out:
@@ -219,8 +219,8 @@ def test_show():
     result = out.getvalue()
     expected = "\n".join(['browser: firefox',
                 'server running: False',
-                'server port: 8888',
-                'server root url: http://127.0.0.1:8888/',
+                'server port: 8880',
+                'server root url: http://127.0.0.1:8880/',
                 ''])
     nose.tools.assert_equals(result, expected)
 
@@ -232,8 +232,8 @@ def test_show():
     expected = ['browser: firefox',
                 'server poll: None',
                 'server running: True',
-                'server port: 8888',
-                'server root url: http://127.0.0.1:8888/',
+                'server port: 8880',
+                'server root url: http://127.0.0.1:8880/',
                 '']
     result = out.getvalue().split('\n')
     diff = [line for line in result if line not in expected]
@@ -500,7 +500,7 @@ def test_name_argument_object_instance_method():
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()
-    p, q = 8888, 9999
+    p, q = 8880, 9999
     process.port = p
     assert process.port == p
     process.port = q

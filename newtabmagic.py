@@ -15,13 +15,13 @@ Sample Usage
 
         In [2]: %newtab --browser firefox
 
-        In [3]: %newtab --port 8889
+        In [3]: %newtab --port 8880
 
     To start the pydoc web server:
 
         In [4]: %newtab --server start
         Starting job # 0 in a separate thread.
-        Server running at http://127.0.0.1:8889/
+        Server running at http://127.0.0.1:8880/
 
     To open pydoc help pages:
 
@@ -38,8 +38,8 @@ Sample Usage
         server pid: 3096
         server poll: None
         server running: True
-        server port: 8889
-        server root url: http://127.0.0.1:8889/
+        server port: 8880
+        server root url: http://127.0.0.1:8880/
 
     To stop the pydoc server:
 
@@ -247,7 +247,7 @@ class ServerProcess(object):
 
     def __init__(self):
         self._process = None
-        self._port = 8889
+        self._port = 8880
 
     def start(self):
         """Start server if not previously started."""

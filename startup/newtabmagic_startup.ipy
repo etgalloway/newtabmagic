@@ -1,4 +1,3 @@
 %load_ext newtabmagic
-%newtab --port 8889
-%newtab --browser firefox
-%newtab --server start
+%newtab --port 8880
+%newtab --browser C:\Program Files (x86)\Google\Chrome\Application\chrome.exe

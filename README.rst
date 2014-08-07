@@ -1,8 +1,7 @@
 newtabmagic
 ===========
 
-**newtabmagic** is an IPython magic that provides access to the
-pydoc web browser.
+An IPython magic for viewing pydoc help pages in the browser.
 
 Viewing Pydoc Help Pages
 ------------------------
@@ -56,7 +55,7 @@ To set the pydoc server port:
 
 .. code:: python
 
-    In [3]: %newtab --port 8889
+    In [3]: %newtab --port 8880
 
 To start the pydoc server:
 
@@ -74,28 +73,3 @@ To stop the server without shutting down IPython:
 .. code:: python
 
     In [1]: %newtab --server stop
-
-Startup Scripts
----------------
-
-Sample startup scripts have been provided.
-
-To start :code:`newtabmagic` from the command line, pass the name of the
-startup script as an argument:
-
-.. code::
-
-    $ python -m IPython $IPYTHONDIR/extensions/newtabmagic_start.py -i
-
-Startup scripts can be run from within IPython:
-
-.. code::
-
-    In [1]: import os
-    In [2]: %run {os.environ['IPYTHONDIR'] + '/extensions/newtabmagic_start.ipy'}
-
-Python startup scripts can also be imported:
-
-.. code::
-
-    In [1]: import extensions.newtabmagic_start

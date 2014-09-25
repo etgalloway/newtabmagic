@@ -333,22 +333,22 @@ def _fully_qualified_name(obj):
     return name
 
 
-def _get_module_name(object_):
+def _get_module_name(obj):
     """Return module name of object, or module name of object's class."""
-    if inspect.ismodule(object_):
-        name = object_.__name__
-    elif inspect.ismethod(object_):
+    if inspect.ismodule(obj):
+        name = obj.__name__
+    elif inspect.ismethod(obj):
         try:
-            name = object_.im_class.__module__
+            name = obj.im_class.__module__
         except AttributeError:
-            name = object_.__self__.__module__
+            name = obj.__self__.__module__
     else:
         try:
-            name = object_.__module__
+            name = obj.__module__
             if name is None:
-                name = object_.__self__.__module__
+                name = obj.__self__.__module__
         except AttributeError:
-            name = object_.__class__.__module__
+            name = obj.__class__.__module__
     return name
 
 

@@ -377,12 +377,6 @@ def _qualname_py3(obj):
     except AttributeError:
         pass
 
-    if hasattr(obj, '__self__'):
-        if inspect.ismodule(obj.__self__):
-            return obj.__name__
-        else:
-            return obj.__self__.__class__.__name__ + "." + obj.__name__
-
     try:
         return obj.__name__
     except AttributeError:

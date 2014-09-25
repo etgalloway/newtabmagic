@@ -408,7 +408,6 @@ def test_name_argument_object_is_not_builtin():
     nose.tools.assert_equals(result, expected)
 
 
-@skipif(sys.version_info[:2] == (3, 2), "Python 3.2 Failure")
 def test_name_argument_decorated_object():
     # In Python 3.3, object has an undecorated.__qualname__ attribute
     # In Python 2.7, object has an im_class attribute
@@ -461,7 +460,6 @@ def test_name_argument_path_attribute_no_module():
     nose.tools.assert_equals(result, expected)
 
 
-@skipif(sys.version_info[:2] == (3, 2), "Python 3.2 Failure")
 def test_name_argument_object_attribute_no_module():
     # Test of object attribute ('mro') not defined in a module
 

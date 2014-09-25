@@ -71,6 +71,14 @@ def _get_newtabmagic(new_tabs_enabled=False, browser='firefox', port=None):
     return newtab
 
 
+def _newtab_url_name(newtab):
+    """Return name part of url."""
+    url = newtab.command_lines[0][1]
+    path = urlparse(url).path
+    # drop leading '/' and trailing '.html'
+    return path[1:-5]
+
+
 def test_set_browser():
     paths = ['chrome',
         'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
@@ -316,14 +324,6 @@ def test_name_argument_nonexistent_browser():
         newtab.newtab, 'sys')
 
 
-def _url_name(newtab):
-    """Return name part of url."""
-    url = newtab.command_lines[0][1]
-    path = urlparse(url).path
-    # drop leading '/' and trailing '.html'
-    return path[1:-5]
-
-
 def test_name_argument_dotted_path():
     # Tests of name arguments which are paths not objects.
 
@@ -334,7 +334,7 @@ def test_name_argument_dotted_path():
     newtab.shell.run_cell('import ' + arg)
     assert arg in newtab.shell.user_ns
     newtab.newtab(arg)
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = arg
     nose.tools.assert_equals(expected, result)
 
@@ -342,7 +342,7 @@ def test_name_argument_dotted_path():
     arg = 'pydoc.locate'
     assert 'pydoc' in newtab.shell.user_ns
     newtab.newtab(arg)
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = arg
     nose.tools.assert_equals(expected, result)
 
@@ -350,7 +350,7 @@ def test_name_argument_dotted_path():
     arg = 'cmath'
     assert arg not in newtab.shell.user_ns
     newtab.newtab(arg)
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = arg
     nose.tools.assert_equals(expected, result)
 
@@ -372,7 +372,7 @@ def test_name_argument_object_module():
     newtab.shell.run_cell('import sys')
     newtab.shell.run_cell('o = sys')
     newtab.newtab('o')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'sys'
     nose.tools.assert_equals(result, expected)
 
@@ -382,7 +382,7 @@ def test_name_argument_object_no_module_attribute():
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('f = str.split')
     newtab.newtab('f')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'str.split'
     nose.tools.assert_equals(result, expected)
 
@@ -392,7 +392,7 @@ def test_name_object_builtin_function():
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('f = len')
     newtab.newtab('f')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'len'
     nose.tools.assert_equals(result, expected)
 
@@ -403,7 +403,7 @@ def test_name_argument_object_is_not_builtin():
     newtab.shell.run_cell('import sys')
     newtab.shell.run_cell('f=sys.settrace')
     newtab.newtab('f')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'sys.settrace'
     nose.tools.assert_equals(result, expected)
 
@@ -415,7 +415,7 @@ def test_name_argument_decorated_object():
     newtab.shell.run_cell('import newtabmagic')
     newtab.shell.run_cell('f=newtabmagic.NewTabMagics.newtab')
     newtab.newtab('f')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'newtabmagic.NewTabMagics.newtab'
     nose.tools.assert_equals(result, expected)
 
@@ -424,7 +424,7 @@ def test_name_argument_object_objclass_attribute():
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('f = str.split')
     newtab.newtab('f')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'str.split'
     nose.tools.assert_equals(result, expected)
 
@@ -434,7 +434,7 @@ def test_name_argument_object_self_attribute():
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('f = "".split')
     newtab.newtab('f')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'str.split'
     nose.tools.assert_equals(result, expected)
 
@@ -444,7 +444,7 @@ def test_name_argument_object_no_name_attribute():
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('x = 0')
     newtab.newtab('x')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'int'
     nose.tools.assert_equals(result, expected)
 
@@ -455,7 +455,7 @@ def test_name_argument_path_attribute_no_module():
     newtab = _get_newtabmagic()
     assert 'IPython' not in newtab.shell.user_ns
     newtab.newtab('IPython.core.debugger.Tracer.mro')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'IPython.core.debugger.Tracer.mro'
     nose.tools.assert_equals(result, expected)
 
@@ -467,7 +467,7 @@ def test_name_argument_object_attribute_no_module():
     newtab.shell.run_cell('import newtabmagic')
     newtab.shell.run_cell('f = newtabmagic.NewTabMagics.mro')
     newtab.newtab('f')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'newtabmagic.NewTabMagics.mro'
     nose.tools.assert_equals(result, expected)
 
@@ -480,7 +480,7 @@ def test_name_argument_object_method_wrapper():
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('f = [].__add__')
     newtab.newtab('f')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'list.__add__'
     nose.tools.assert_equals(result, expected)
 
@@ -490,7 +490,7 @@ def test_name_argument_object_instance_method():
     newtab = _get_newtabmagic()
     newtab.shell.run_cell('im=get_ipython')
     newtab.newtab('im')
-    result = _url_name(newtab)
+    result = _newtab_url_name(newtab)
     expected = 'IPython.terminal.interactiveshell.TerminalInteractiveShell.get_ipython'
     nose.tools.assert_equals(result, expected)
 

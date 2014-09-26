@@ -363,8 +363,8 @@ def _qualname(obj):
 def _qualname_py3(obj):
     """Qualified name, not including module name, for Python 3."""
 
-    if hasattr(obj, "undecorated"):
-        return obj.undecorated.__qualname__
+    if hasattr(obj, "__wrapped__"):
+        return obj.__wrapped__.__qualname__
 
     if inspect.ismethod(obj):
         return obj.__self__.__class__.__name__ + '.' + obj.__func__.__name__

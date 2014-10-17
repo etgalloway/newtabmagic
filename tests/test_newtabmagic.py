@@ -366,6 +366,16 @@ def test_name_argument_dotted_path():
     nose.tools.assert_equals(newtab.command_lines, [])
 
 
+def _test_name_argument(obj, expected):
+    """Helper function used to test object name arguments."""
+
+    newtab = _get_newtabmagic()
+    newtab.shell.push({'obj':obj})
+    newtab.newtab('obj')
+    result = _newtab_url_name(newtab)
+    nose.tools.assert_equals(result, expected)
+
+
 def test_name_argument_object_module():
     # Object is a module
     newtab = _get_newtabmagic()

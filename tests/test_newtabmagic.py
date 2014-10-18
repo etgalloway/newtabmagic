@@ -8,6 +8,7 @@ To run tests:
 '''
 # pylint: disable=C0111, C0321, R0903
 import contextlib
+import inspect
 import nose
 import socket
 import sys
@@ -378,85 +379,68 @@ def _test_name_argument(obj, expected):
 
 def test_name_argument_object_module():
     # Object is a module
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('import sys')
-    newtab.shell.run_cell('o = sys')
-    newtab.newtab('o')
-    result = _newtab_url_name(newtab)
+    obj = sys
+    assert inspect.ismodule(obj)
     expected = 'sys'
-    nose.tools.assert_equals(result, expected)
+    _test_name_argument(obj, expected)
 
 
 def test_name_argument_object_no_module_attribute():
     # Object does not have a '__module__' attribute
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('f = str.split')
-    newtab.newtab('f')
-    result = _newtab_url_name(newtab)
+    obj = str.split
     expected = 'str.split'
-    nose.tools.assert_equals(result, expected)
+    _test_name_argument(obj, expected)
 
 
-def test_name_object_builtin_function():
+def test_name_argument_object_builtin_function():
     # Object module attribute is 'builtins' or '__builtin__'
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('f = len')
-    newtab.newtab('f')
-    result = _newtab_url_name(newtab)
+    obj = len
     expected = 'len'
-    nose.tools.assert_equals(result, expected)
+    _test_name_argument(obj, expected)
 
 
 def test_name_argument_object_is_not_builtin():
     # Object is not defined in the builtin module.
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('import sys')
-    newtab.shell.run_cell('f=sys.settrace')
-    newtab.newtab('f')
-    result = _newtab_url_name(newtab)
+    obj=sys.settrace
     expected = 'sys.settrace'
-    nose.tools.assert_equals(result, expected)
+    _test_name_argument(obj, expected)
 
 
 def test_name_argument_decorated_object():
     # In Python 3.3, object has an undecorated.__qualname__ attribute
     # In Python 2.7, object has an im_class attribute
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('import newtabmagic')
-    newtab.shell.run_cell('f=newtabmagic.NewTabMagics.newtab')
-    newtab.newtab('f')
-    result = _newtab_url_name(newtab)
+    obj = newtabmagic.NewTabMagics.newtab
     expected = 'newtabmagic.NewTabMagics.newtab'
-    nose.tools.assert_equals(result, expected)
+    _test_name_argument(obj, expected)
 
 
 def test_name_argument_object_objclass_attribute():
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('f = str.split')
-    newtab.newtab('f')
-    result = _newtab_url_name(newtab)
+
+    f = str.split
+    assert hasattr(f,'__objclass__')
+
+    obj = str.split
     expected = 'str.split'
-    nose.tools.assert_equals(result, expected)
+    _test_name_argument(obj, expected)
 
 
 def test_name_argument_object_self_attribute():
     # Test for Python 2.7
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('f = "".split')
-    newtab.newtab('f')
-    result = _newtab_url_name(newtab)
+    f = "".split
+    assert hasattr(f, '__qualname__') or sys.version_info < (3,3)
+
+    obj = str.split
     expected = 'str.split'
-    nose.tools.assert_equals(result, expected)
+    _test_name_argument(obj, expected)
 
 
 def test_name_argument_object_no_name_attribute():
     # Object does not have a '__name__' attribute.
-    newtab = _get_newtabmagic()
-    newtab.shell.run_cell('x = 0')
-    newtab.newtab('x')
-    result = _newtab_url_name(newtab)
+    obj = 0
+    assert not hasattr(obj,'__name__')
+
     expected = 'int'
-    nose.tools.assert_equals(result, expected)
+    _test_name_argument(obj, expected)
 
 
 def test_name_argument_path_attribute_no_module():

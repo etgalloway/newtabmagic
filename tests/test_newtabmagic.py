@@ -288,18 +288,6 @@ def test_newtab_name_arguments():
     nose.tools.assert_equals(result, expected)
 
 
-def test_name_argument_doc_not_found():
-
-    newtab = _get_newtabmagic()
-
-    with stdout_redirected() as out:
-        newtab.newtab('does.not.exist')
-
-    result = out.getvalue()
-    expected = 'Documentation not found: does.not.exist\n'
-    nose.tools.assert_equals(result, expected)
-
-
 def test_name_argument_browser_not_initialized():
     # Exception thrown if browser not initialized
 
@@ -365,6 +353,18 @@ def test_name_argument_dotted_path():
     arg = 'does.not.exist'
     newtab.newtab(arg)
     nose.tools.assert_equals(newtab.command_lines, [])
+
+
+def test_name_argument_doc_not_found():
+
+    newtab = _get_newtabmagic()
+
+    with stdout_redirected() as out:
+        newtab.newtab('does.not.exist')
+
+    result = out.getvalue()
+    expected = 'Documentation not found: does.not.exist\n'
+    nose.tools.assert_equals(result, expected)
 
 
 def _test_name_argument(obj, expected):

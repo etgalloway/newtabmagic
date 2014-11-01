@@ -313,45 +313,24 @@ def test_name_argument_browser_does_not_exist():
         newtab.newtab, 'sys')
 
 
-def test_name_argument_dotted_path():
-    # Tests of name arguments which are paths not objects.
+def test_name_argument_path_not_object_in_user_namespace():
+    # Name argument does not refer to an object in the user name space.
 
     newtab = _get_newtabmagic()
-
-    # Name in user name space
-    arg = 'pydoc'
-    newtab.shell.run_cell('import ' + arg)
-    assert arg in newtab.shell.user_ns
-    newtab.newtab(arg)
+    assert 'cmath' not in newtab.shell.user_ns
+    newtab.newtab('cmath')
     result = _newtab_url_name(newtab)
-    expected = arg
+    expected = 'cmath'
     nose.tools.assert_equals(expected, result)
 
-    # Name in user namespace with attribute
-    arg = 'pydoc.locate'
-    assert 'pydoc' in newtab.shell.user_ns
-    newtab.newtab(arg)
-    result = _newtab_url_name(newtab)
-    expected = arg
-    nose.tools.assert_equals(expected, result)
 
-    # Name not in user name space
-    arg = 'cmath'
-    assert arg not in newtab.shell.user_ns
-    newtab.newtab(arg)
-    result = _newtab_url_name(newtab)
-    expected = arg
-    nose.tools.assert_equals(expected, result)
-
-    # module in user namespace, nonexistent attribute
-    arg = 'pydoc.non_existent_attribute'
-    assert 'pydoc' in newtab.shell.user_ns
-    newtab.newtab(arg)
-    nose.tools.assert_equals(newtab.command_lines, [])
-
-    # invalid path
-    arg = 'does.not.exist'
-    newtab.newtab(arg)
+def test_name_argument_path_object_nonexistent_attribute():
+    class C(object):
+        pass
+    newtab = _get_newtabmagic()
+    newtab.shell.push({'c': C()})
+    assert 'c' in newtab.shell.user_ns
+    newtab.newtab('c.non_existent_attribute')
     nose.tools.assert_equals(newtab.command_lines, [])
 
 

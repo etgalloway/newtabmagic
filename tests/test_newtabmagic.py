@@ -354,6 +354,26 @@ def test_name_argument_path_nonexistent():
     nose.tools.assert_equals(newtab.command_lines, [])
 
 
+def _newtabmagic_help_page_name(obj):
+    """Return path part of help url not including extension."""
+
+    newtab = _get_newtabmagic()
+    newtab.shell.push({'obj': obj})
+    newtab.newtab('obj')
+    path = _newtab_url_name(newtab)
+    return path
+
+
+def test_name_argument_object_module():
+    # Object is a module.
+    obj = sys
+    assert type(obj).__name__ == 'module'
+
+    expected = 'sys'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

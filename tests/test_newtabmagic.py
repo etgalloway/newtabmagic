@@ -314,7 +314,7 @@ def test_name_argument_browser_not_initialized():
     nose.tools.assert_equals(result, expected)
 
 
-def test_name_argument_nonexistent_browser():
+def test_name_argument_browser_does_not_exist():
     # Exception thrown if browser does not exist
 
     newtab = _get_newtabmagic(new_tabs_enabled=True)

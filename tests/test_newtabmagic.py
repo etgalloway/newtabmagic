@@ -1,11 +1,10 @@
-'''
-Tests for newtabmagic
+"""Tests for newtabmagic.
 
 To run tests:
 
     nosetests
 
-'''
+"""
 # pylint: disable=C0111, C0321, R0903
 import contextlib
 import inspect
@@ -81,7 +80,9 @@ def _newtab_url_name(newtab):
 
 
 def test_set_browser():
-    paths = ['chrome',
+
+    paths = [
+        'chrome',
         'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
         'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe']
 
@@ -134,7 +135,7 @@ def test_server_start_stop():
 
     result = out.getvalue()
     expected = ("Starting job # ? in a separate thread.\n"
-       "Server running at {}\n".format(url))
+                "Server running at {}\n".format(url))
     head, tail = expected.split('?')
     nose.tools.assert_true(result.startswith(head))
     nose.tools.assert_true(result.endswith(tail))
@@ -225,12 +226,12 @@ def test_show():
     with stdout_redirected() as out:
         newtab.newtab('--show')
 
-    result = out.getvalue()
-    expected = "\n".join(['browser: firefox',
+    result = out.getvalue().split('\n')
+    expected = ['browser: firefox',
                 'server running: False',
                 'server port: 8880',
                 'server root url: http://127.0.0.1:8880/',
-                ''])
+                '']
     nose.tools.assert_equals(result, expected)
 
     # Server running
@@ -258,7 +259,7 @@ def test_newtab_name_argument():
     url = newtab.base_url()
 
     with stdout_redirected() as out:
-        newtab.newtab('sys') # name argument
+        newtab.newtab('sys')  # name argument
 
     output = out.getvalue()
     nose.tools.assert_equals(output, '')
@@ -276,7 +277,7 @@ def test_newtab_name_arguments():
     url = newtab.base_url()
 
     with stdout_redirected() as out:
-        newtab.newtab('sys os zip') # name arguments
+        newtab.newtab('sys os zip')  # name arguments
 
     output = out.getvalue()
     nose.tools.assert_equals(output, '')

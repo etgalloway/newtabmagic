@@ -355,16 +355,23 @@ def test_name_argument_dotted_path():
     nose.tools.assert_equals(newtab.command_lines, [])
 
 
-def test_name_argument_doc_not_found():
+def test_name_argument_path_nonexistent():
+    # Error message is printed; new tab command is not invoked.
 
     newtab = _get_newtabmagic()
 
+    name_arg = 'does.not.exist'
     with stdout_redirected() as out:
-        newtab.newtab('does.not.exist')
+        newtab.newtab(name_arg)
+    msg = out.getvalue()
 
-    result = out.getvalue()
+    # Error message is printed
+    result = msg
     expected = 'Documentation not found: does.not.exist\n'
     nose.tools.assert_equals(result, expected)
+
+    # New tab not opened
+    nose.tools.assert_equals(newtab.command_lines, [])
 
 
 def _test_name_argument(obj, expected):

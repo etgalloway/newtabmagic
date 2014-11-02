@@ -374,6 +374,20 @@ def test_name_argument_object_module():
     nose.tools.assert_equals(page, expected)
 
 
+class C1(object):
+    pass
+
+
+def test_name_argument_object_class():
+    # Object is a class.
+
+    obj = C1
+    assert inspect.isclass(obj)
+    expected = 'tests.test_newtabmagic.C1'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

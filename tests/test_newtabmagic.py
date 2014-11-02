@@ -388,6 +388,18 @@ def test_name_argument_object_class():
     nose.tools.assert_equals(page, expected)
 
 
+def test_name_argument_object_builtin_function():
+    # Type of object is 'builtin_function_or_method'.
+    # Object is a function.
+    obj = len
+    assert type(obj).__name__ == 'builtin_function_or_method'
+    assert 'built-in function' in repr(obj)
+
+    expected = 'len'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

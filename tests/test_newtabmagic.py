@@ -446,6 +446,22 @@ def test_name_argument_object_function():
     nose.tools.assert_equals(page, expected)
 
 
+def test_name_argument_object_function_wrapped_attribute_py3():
+    # Test needed for coverage in Python 3 only.
+    # Object has a __wrapped__ attribute (in Python 2 and 3).
+    # In Python 3, object type is 'function'.
+    # In Python 2.7, object is an 'instancemethod'.
+    # In Python 2.7, object has an im_class attribute.
+
+    obj = IPython.core.magics.ScriptMagics.shebang
+    assert hasattr(obj, '__wrapped__')
+    assert type(obj).__name__ == 'function' or sys.version_info[0] == 2
+
+    expected = 'IPython.core.magics.script.ScriptMagics.shebang'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

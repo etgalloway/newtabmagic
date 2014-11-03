@@ -432,6 +432,20 @@ def test_name_argument_object_builtin_self_is_class():
     nose.tools.assert_equals(page, expected)
 
 
+def f1():
+    pass
+
+
+def test_name_argument_object_function():
+    # Object is a function
+    obj = f1
+    assert type(obj).__name__ == 'function'
+
+    expected = 'tests.test_newtabmagic.f1'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

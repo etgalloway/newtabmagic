@@ -414,6 +414,24 @@ def test_name_argument_object_builtin_self_not_class():
     nose.tools.assert_equals(page, expected)
 
 
+class C2(object):
+    pass
+
+
+def test_name_argument_object_builtin_self_is_class():
+    # Object type is 'builtin_function_or_method'.
+    # Object is a method.
+    # Object __self__ attribute is a class.
+    obj = C2.mro
+    assert type(obj).__name__ == 'builtin_function_or_method'
+    assert 'built-in method' in repr(obj)
+    assert inspect.isclass(obj.__self__)
+
+    expected = 'tests.test_newtabmagic.C2.mro'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

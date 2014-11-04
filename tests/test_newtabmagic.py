@@ -462,6 +462,18 @@ def test_name_argument_object_function_wrapped_attribute_py3():
     nose.tools.assert_equals(page, expected)
 
 
+def test_name_argument_object_method_descriptor():
+    # Object is a method descriptor with an __objclass__ attribute
+
+    obj = str.split
+    assert type(obj).__name__ == 'method_descriptor'
+    assert hasattr(obj, '__objclass__')
+
+    expected = 'str.split'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

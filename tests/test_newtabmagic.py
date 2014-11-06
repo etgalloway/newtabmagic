@@ -543,6 +543,34 @@ def test_name_argument_object_instance_method():
     nose.tools.assert_equals(page, expected)
 
 
+class C5(object):
+    @classmethod
+    def m(cls):
+        """method decorated by @classmethod"""
+
+
+def test_name_argument_object_classmethod():
+    # Name argument object is a 'class method'.
+
+    obj = C5.m
+
+    # Type of object is 'instancemethod' in Python 2
+    assert type(obj).__name__ == 'instancemethod' or sys.version_info[0] != 2
+
+    # Type of object is 'method' in Python 3+.
+    assert type(obj).__name__ == 'method' or sys.version_info[0] == 2
+
+    # The '__self__' attribute is a class.
+    assert inspect.isclass(obj.__self__)
+
+    # Object is not an instance of 'classmethod'.
+    assert not isinstance(obj, classmethod)
+
+    expected = 'tests.test_newtabmagic.C5.m'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

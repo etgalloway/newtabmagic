@@ -506,6 +506,26 @@ def test_name_argument_object_method_wrapper():
     nose.tools.assert_equals(page, expected)
 
 
+class C3(object):
+    def f(self):
+        """method"""
+
+
+def test_name_argument_object_method_py2_unbound():
+    # In Python 2, object is an unbound method.
+    # In Python 3, object is a function.
+    # Test not needed for coverage in Python 3.
+
+    obj = C3.f
+    assert type(obj).__name__ == 'instancemethod' and \
+        'unbound' in repr(obj) or sys.version_info[0] > 2
+    assert type(obj).__name__ == 'function' or sys.version_info[0] == 2
+
+    expected = 'tests.test_newtabmagic.C3.f'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

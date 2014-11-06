@@ -526,6 +526,23 @@ def test_name_argument_object_method_py2_unbound():
     nose.tools.assert_equals(page, expected)
 
 
+class C4(object):
+    def method(self):
+        pass
+
+
+def test_name_argument_object_instance_method():
+    # Object is an instance method.
+
+    obj = C4().method
+    assert type(obj).__name__ in ['method', 'instancemethod']
+    assert not inspect.isclass(obj.__self__)
+
+    expected = 'tests.test_newtabmagic.C4.method'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

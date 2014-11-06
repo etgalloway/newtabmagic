@@ -388,6 +388,15 @@ def test_name_argument_object_class():
     nose.tools.assert_equals(page, expected)
 
 
+def test_name_argument_object_class_instance():
+    # Object is an instance of a class.
+    obj = C1()
+
+    expected = 'tests.test_newtabmagic.C1'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_name_argument_object_builtin_function():
     # Type of object is 'builtin_function_or_method'.
     # Object is a function.

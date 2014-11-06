@@ -494,6 +494,18 @@ def test_name_argument_object_wrapper_descriptor():
     nose.tools.assert_equals(page, expected)
 
 
+def test_name_argument_object_method_wrapper():
+    # Test object of type 'method-wrapper'.
+    # Type 'method-wrapper' only defined in CPython.
+
+    obj = [].__add__
+    assert type(obj).__name__ == 'method-wrapper'
+
+    expected = 'list.__add__'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

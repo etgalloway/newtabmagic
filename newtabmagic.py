@@ -166,7 +166,7 @@ class NewTabMagics(Magics):
         """Return name of pydoc page, or None if path is not valid."""
         obj = self._get_user_ns_object(path)
         if obj is not None:
-            page_name = _fully_qualified_name(obj)
+            page_name = _get_object_pydoc_page_name(obj)
         else:
             obj = pydoc.locate(path)
             if obj is not None:
@@ -316,20 +316,26 @@ class ServerProcess(object):
             print('Server already running. Port number not changed')
 
 
-def _fully_qualified_name(obj):
+def _get_object_pydoc_page_name(obj):
     """Returns fully qualified name, including module name, except for the
     built-in module."""
+    page_name = _fully_qualified_name(obj)
+    if page_name is not None:
+        if page_name.startswith('builtins.'):
+            page_name = page_name[len('builtins.'):]
+        elif page_name.startswith('__builtin__.'):
+            page_name = page_name[len('__builtin__.'):]
+    return page_name
+
+
+def _fully_qualified_name(obj):
+    """Fully qualified name, including name of module."""
 
     module_name = _get_module_name(obj)
-
     if inspect.ismodule(obj):
         name = module_name
     else:
-        qualname = _qualname(obj)
-        if module_name in ['builtins', '__builtin__']:
-            name = qualname
-        else:
-            name = module_name + '.' + qualname
+        name = module_name + '.' + _qualname(obj)
     return name
 
 

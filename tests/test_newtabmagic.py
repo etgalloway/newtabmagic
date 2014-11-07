@@ -609,6 +609,34 @@ def test_name_argument_object_property():
     nose.tools.assert_equals(page, expected)
 
 
+class C7(object):
+    class N(object):
+        pass
+
+
+def test_name_argument_object_nested_class_instance():
+    # Object is an instance of a nested class.
+    # Introspection fails for nested classes in Python 2.
+
+    if sys.version_info[0] == 2:
+        # Incorrect name attribute for nested classes in Python 2.
+        # See http://bugs.python.org/msg166775
+        assert repr(C7.N) == "<class 'tests.test_newtabmagic.N'>"
+    else:
+        assert repr(C7.N) == "<class 'tests.test_newtabmagic.C7.N'>"
+
+    obj = C7().N()
+
+    if sys.version_info[0] == 2:
+        # Introspection fails for Python 2.
+        expected = 'tests.test_newtabmagic.N'
+    else:
+        expected = 'tests.test_newtabmagic.C7.N'
+
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

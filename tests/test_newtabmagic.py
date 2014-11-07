@@ -483,6 +483,19 @@ def test_name_argument_object_method_descriptor():
     nose.tools.assert_equals(page, expected)
 
 
+def test_name_argument_object_member_descriptor():
+    # Object is member descriptor with an __objclass__ attribute
+
+    import datetime
+    obj = datetime.timedelta.days
+    assert type(obj).__name__ == 'member_descriptor'
+    assert hasattr(obj, '__objclass__')
+
+    expected = 'datetime.timedelta.days'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_name_argument_object_wrapper_descriptor():
     # Object is a wrapper descriptor with an __objclass__ attribute.
     obj = int.__add__

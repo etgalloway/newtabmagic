@@ -637,6 +637,26 @@ def test_name_argument_object_nested_class_instance():
     nose.tools.assert_equals(page, expected)
 
 
+class C8(object):
+    class N(object):
+        def method(self):
+            pass
+
+
+def test_name_argument_object_nested_class_method():
+    # Name argument object is a nested class method.
+    # Introspection fails for nested class methods in Python 2.
+
+    obj = C8().N().method
+    assert inspect.ismethod(obj)
+    if sys.version_info[0] == 2:
+        expected = 'tests.test_newtabmagic.N.method'
+    else:
+        expected = 'tests.test_newtabmagic.C8.N.method'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

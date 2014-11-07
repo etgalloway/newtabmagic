@@ -584,6 +584,31 @@ def test_name_argument_object_classmethod():
     nose.tools.assert_equals(page, expected)
 
 
+class C6(object):
+    def __init__(self):
+        self._x = 0
+
+    @property
+    def x(self):
+        return self._x
+
+
+def test_name_argument_object_property():
+    # Object is a property with a fget attribute.
+    # Python 2 does not support introspection for properties.
+
+    obj = C6.x
+    assert type(obj).__name__ == 'property'
+    assert hasattr(obj, 'fget')
+
+    if sys.version_info.major == 3:
+        expected = 'tests.test_newtabmagic.C6.x'
+    else:
+        expected = 'property'
+    page = _newtabmagic_help_page_name(obj)
+    nose.tools.assert_equals(page, expected)
+
+
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

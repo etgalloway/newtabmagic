@@ -397,6 +397,18 @@ def _fully_qualified_name_builtin_py3(obj):
     return module + '.' + obj.__qualname__
 
 
+def _fully_qualified_name_function_py3(obj):
+    """Fully qualified name in Python 3 for 'function' objects.
+    """
+
+    if hasattr(obj, "__wrapped__"):
+        qualname = obj.__wrapped__.__qualname__
+    else:
+        qualname = obj.__qualname__
+
+    return obj.__module__ + '.' + qualname
+
+
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.

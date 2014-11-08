@@ -328,6 +328,14 @@ def _get_object_pydoc_page_name(obj):
     return page_name
 
 
+def _fully_qualified_name(obj):
+    """Returns fully qualified name, or None if introspection not supported."""
+    if sys.version_info >= (3,):
+        return _fully_qualified_name_py3(obj)
+    else:
+        return _fully_qualified_name_py2(obj)
+
+
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.

@@ -421,6 +421,47 @@ def _fully_qualified_name_method_py3(obj):
     return obj.__self__.__module__ + '.' + cls + '.' + obj.__name__
 
 
+def _fully_qualified_name_py2(obj):
+    """Fully qualified name for Python 2."""
+
+    if type(obj).__name__ == 'builtin_function_or_method':
+
+        return _fully_qualified_name_builtin_py2(obj)
+
+    elif type(obj).__name__ == 'function':
+
+        return _fully_qualified_name_function_py2(obj)
+
+    elif type(obj).__name__ == 'generator':
+        # Introspection not supported for generators prior to Python 3.5.
+        return None
+
+    elif type(obj).__name__ in ['member_descriptor',
+                                'wrapper_descriptor', 'method_descriptor']:
+
+        return (obj.__objclass__.__module__ + '.' +
+                obj.__objclass__.__name__ + '.' +
+                obj.__name__)
+
+    elif type(obj).__name__ == 'instancemethod':
+
+        return _fully_qualified_name_method_py2(obj)
+
+    elif type(obj).__name__ == 'method-wrapper':
+
+        return _fully_qualified_name_py2(obj.__self__) + '.' + obj.__name__
+
+    elif type(obj).__name__ == 'module':
+
+        return obj.__name__
+
+    elif inspect.isclass(obj):
+
+        return obj.__module__ + '.' + obj.__name__
+
+    return obj.__class__.__module__ + '.' + obj.__class__.__name__
+
+
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.

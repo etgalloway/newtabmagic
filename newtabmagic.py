@@ -409,6 +409,18 @@ def _fully_qualified_name_function_py3(obj):
     return obj.__module__ + '.' + qualname
 
 
+def _fully_qualified_name_method_py3(obj):
+    """Fully qualified name in Python 3 for 'method' objects.
+    """
+
+    if inspect.isclass(obj.__self__):
+        cls = obj.__self__.__qualname__
+    else:
+        cls = obj.__self__.__class__.__qualname__
+
+    return obj.__self__.__module__ + '.' + cls + '.' + obj.__name__
+
+
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.

@@ -336,6 +336,49 @@ def _fully_qualified_name(obj):
         return _fully_qualified_name_py2(obj)
 
 
+def _fully_qualified_name_py3(obj):
+    """Returns fully qualified name for Python 3."""
+
+    if type(obj).__name__ == 'builtin_function_or_method':
+
+        return _fully_qualified_name_builtin_py3(obj)
+
+    elif type(obj).__name__ == 'function':
+
+        return _fully_qualified_name_function_py3(obj)
+
+    elif type(obj).__name__ == 'generator':
+        # Introspection not supported for generators prior to Python 3.5.
+        return None
+
+    elif type(obj).__name__ in ['member_descriptor',
+                                'wrapper_descriptor', 'method_descriptor']:
+
+        return obj.__objclass__.__module__ + '.' + obj.__qualname__
+
+    elif type(obj).__name__ == 'method':
+
+        return _fully_qualified_name_method_py3(obj)
+
+    elif type(obj).__name__ == 'method-wrapper':
+
+        return _fully_qualified_name_py3(obj.__self__) + '.' + obj.__name__
+
+    elif type(obj).__name__ == 'module':
+
+        return obj.__name__
+
+    elif type(obj).__name__ == 'property':
+
+        return obj.fget.__module__ + '.' + obj.fget.__qualname__
+
+    elif inspect.isclass(obj):
+
+        return obj.__module__ + '.' + obj.__qualname__
+
+    return obj.__class__.__module__ + '.' + obj.__class__.__qualname__
+
+
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.

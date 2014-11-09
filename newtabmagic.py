@@ -462,6 +462,27 @@ def _fully_qualified_name_py2(obj):
     return obj.__class__.__module__ + '.' + obj.__class__.__name__
 
 
+def _fully_qualified_name_builtin_py2(obj):
+    """Fully qualified name in Python 2 for 'builtin_function_or_method'
+    objects.
+    """
+
+    if obj.__self__ is None:
+        # built-in functions
+        module = obj.__module__
+        qualname = obj.__name__
+    else:
+        # built-in methods
+        if inspect.isclass(obj.__self__):
+            cls = obj.__self__
+        else:
+            cls = obj.__self__.__class__
+        module = cls.__module__
+        qualname = cls.__name__ + '.' + obj.__name__
+
+    return module + '.' + qualname
+
+
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.

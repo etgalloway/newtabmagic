@@ -430,7 +430,7 @@ def _fully_qualified_name_py2(obj):
 
     elif type(obj).__name__ == 'function':
 
-        return _fully_qualified_name_function_py2(obj)
+        return obj.__module__ + '.' + obj.__name__
 
     elif type(obj).__name__ == 'generator':
         # Introspection not supported for generators prior to Python 3.5.

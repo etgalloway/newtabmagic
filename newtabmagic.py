@@ -483,6 +483,27 @@ def _fully_qualified_name_builtin_py2(obj):
     return module + '.' + qualname
 
 
+def _fully_qualified_name_method_py2(obj):
+    """Fully qualified name for 'instancemethod' objects in Python 2.
+    """
+
+    if obj.__self__ is None:
+        # unbound method
+        module = obj.im_class.__module__
+        cls = obj.im_class.__name__
+    else:
+        # bound method
+        if inspect.isclass(obj.__self__):
+            # method decorated with @classmethod
+            module = obj.__self__.__module__
+            cls = obj.__self__.__name__
+        else:
+            module = obj.__self__.__class__.__module__
+            cls = obj.__self__.__class__.__name__
+
+    return module + '.' + cls + '.' + obj.__func__.__name__
+
+
 def _getattr_path(obj, attrs):
     """Get a named attribute from an object, returning None if the
     attribute does not exist.

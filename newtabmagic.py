@@ -540,13 +540,15 @@ def pydoc_cli_monkey_patched(port):
     """In Python 3, run pydoc.cli with builtins.input monkey-patched
     so that pydoc can be run as a process.
     """
-    import builtins
+
     # Monkey-patch input so that input does not raise EOFError when
     # called by pydoc.cli
-    def input(_): # pylint: disable=W0622
+    def input(_):  # pylint: disable=W0622
         """Monkey-patched version of builtins.input"""
         while 1:
             time.sleep(1.0)
+
+    import builtins
     builtins.input = input
     sys.argv += ["-p", port]
     pydoc.cli()

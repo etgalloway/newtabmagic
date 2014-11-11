@@ -16,8 +16,6 @@ import time
 import IPython
 import newtabmagic
 
-from IPython.testing.decorators import skipif
-
 if sys.version_info.major == 2:
     from StringIO import StringIO
     from urlparse import urlparse

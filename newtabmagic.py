@@ -208,8 +208,7 @@ class NewTabMagics(Magics):
         """Open a new browser tab by invoking a subprocess."""
         try:
             if self.new_tabs_enabled:
-                # chromium browser writes to screen, so redirect
-                subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                subprocess.Popen(cmd)
         except OSError:
             msg = "Browser named {} failed to open new tab\n".format(
                 self._browser)

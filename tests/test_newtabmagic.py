@@ -14,6 +14,7 @@ import sys
 import time
 
 import IPython
+from IPython.core.error import UsageError
 import newtabmagic
 
 if sys.version_info.major == 2:
@@ -74,6 +75,17 @@ def _newtabmagic_message(newtab, arg):
         newtab.newtab(arg)
         msg = out.getvalue()
     return msg
+
+
+def _newtabmagic_UsageError(newtab, args):
+    """Return UsageError raised by newtabmagic command, or None if none."""
+    try:
+        newtab.newtab(args)
+    except UsageError as e:
+        error = e
+    else:
+        error = None
+    return error
 
 
 def _newtab_url_name(newtab):
@@ -279,14 +291,9 @@ def test_name_argument_browser_not_initialized():
     # Exception thrown if browser not initialized
 
     newtab = _get_newtabmagic(browser=None)
-
-    try:
-        newtab.newtab('sys')
-    except IPython.core.error.UsageError as error:
-        result = error.args
-
+    exception = _newtabmagic_UsageError(newtab, 'sys')
     expected = ('Browser not initialized\n',)
-    nose.tools.assert_equals(result, expected)
+    nose.tools.assert_equals(exception.args, expected)
 
 
 def test_name_argument_browser_does_not_exist():
@@ -294,10 +301,9 @@ def test_name_argument_browser_does_not_exist():
 
     newtab = _get_newtabmagic(new_tabs_enabled=True)
     newtab.newtab('--browser nonexistent')
-
-    nose.tools.assert_raises(
-        IPython.core.error.UsageError,
-        newtab.newtab, 'sys')
+    exception = _newtabmagic_UsageError(newtab, 'sys')
+    expected = ('Browser named nonexistent failed to open new tab\n',)
+    nose.tools.assert_equals(expected, exception.args)
 
 
 def test_name_argument_path_not_object_in_user_namespace():

@@ -340,7 +340,7 @@ def test_name_argument_path_nonexistent():
     nose.tools.assert_equals(newtab.command_lines, [])
 
 
-def _newtabmagic_help_page_name(obj):
+def _newtabmagic_object_page_name(obj):
     """Return path part of help url not including extension."""
 
     newtab = _get_newtabmagic()
@@ -356,8 +356,7 @@ def test_name_argument_object_module():
     assert type(obj).__name__ == 'module'
 
     expected = 'sys'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 class C1(object):
@@ -370,8 +369,8 @@ def test_name_argument_object_class():
     obj = C1
     assert inspect.isclass(obj)
     expected = 'tests.test_newtabmagic.C1'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def test_name_argument_object_class_instance():
@@ -379,8 +378,7 @@ def test_name_argument_object_class_instance():
     obj = C1()
 
     expected = 'tests.test_newtabmagic.C1'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def test_name_argument_object_builtin_function():
@@ -391,8 +389,7 @@ def test_name_argument_object_builtin_function():
     assert 'built-in function' in repr(obj)
 
     expected = 'len'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def test_name_argument_object_builtin_self_not_class():
@@ -405,8 +402,7 @@ def test_name_argument_object_builtin_self_not_class():
     assert not inspect.isclass(obj.__self__)
 
     expected = 'list.append'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 class C2(object):
@@ -423,8 +419,8 @@ def test_name_argument_object_builtin_self_is_class():
     assert inspect.isclass(obj.__self__)
 
     expected = 'tests.test_newtabmagic.C2.mro'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def f1():
@@ -437,8 +433,8 @@ def test_name_argument_object_function():
     assert type(obj).__name__ == 'function'
 
     expected = 'tests.test_newtabmagic.f1'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def test_name_argument_object_function_wrapped_attribute_py3():
@@ -453,8 +449,8 @@ def test_name_argument_object_function_wrapped_attribute_py3():
     assert type(obj).__name__ == 'function' or sys.version_info[0] == 2
 
     expected = 'IPython.core.magics.script.ScriptMagics.shebang'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def test_name_argument_object_method_descriptor():
@@ -465,8 +461,8 @@ def test_name_argument_object_method_descriptor():
     assert hasattr(obj, '__objclass__')
 
     expected = 'str.split'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def test_name_argument_object_member_descriptor():
@@ -478,8 +474,8 @@ def test_name_argument_object_member_descriptor():
     assert hasattr(obj, '__objclass__')
 
     expected = 'datetime.timedelta.days'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def test_name_argument_object_wrapper_descriptor():
@@ -489,8 +485,8 @@ def test_name_argument_object_wrapper_descriptor():
     assert hasattr(obj, '__objclass__')
 
     expected = 'int.__add__'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def test_name_argument_object_method_wrapper():
@@ -501,8 +497,8 @@ def test_name_argument_object_method_wrapper():
     assert type(obj).__name__ == 'method-wrapper'
 
     expected = 'list.__add__'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 class C3(object):
@@ -521,8 +517,8 @@ def test_name_argument_object_method_py2_unbound():
     assert type(obj).__name__ == 'function' or sys.version_info[0] == 2
 
     expected = 'tests.test_newtabmagic.C3.f'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 class C4(object):
@@ -538,8 +534,8 @@ def test_name_argument_object_instance_method():
     assert not inspect.isclass(obj.__self__)
 
     expected = 'tests.test_newtabmagic.C4.method'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 class C5(object):
@@ -566,8 +562,8 @@ def test_name_argument_object_classmethod():
     assert not isinstance(obj, classmethod)
 
     expected = 'tests.test_newtabmagic.C5.m'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 class C6(object):
@@ -591,8 +587,8 @@ def test_name_argument_object_property():
         expected = 'tests.test_newtabmagic.C6.x'
     else:
         expected = 'property'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 class C7(object):
@@ -619,8 +615,7 @@ def test_name_argument_object_nested_class_instance():
     else:
         expected = 'tests.test_newtabmagic.C7.N'
 
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 class C8(object):
@@ -639,8 +634,7 @@ def test_name_argument_object_nested_class_method():
         expected = 'tests.test_newtabmagic.N.method'
     else:
         expected = 'tests.test_newtabmagic.C8.N.method'
-    page = _newtabmagic_help_page_name(obj)
-    nose.tools.assert_equals(page, expected)
+    nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
 def gf():

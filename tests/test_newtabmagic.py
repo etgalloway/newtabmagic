@@ -69,6 +69,13 @@ def _get_newtabmagic(new_tabs_enabled=False, browser='firefox', port=None):
     return newtab
 
 
+def _newtabmagic_message(newtab, arg):
+    with stdout_redirected() as out:
+        newtab.newtab(arg)
+        msg = out.getvalue()
+    return msg
+
+
 def _newtab_url_name(newtab):
     """Return name part of url."""
     url = newtab.command_lines[0][1]
@@ -111,10 +118,8 @@ def test_set_port_server_running():
     newtab = _get_newtabmagic(port=9999)
     root_original = newtab.base_url()
     with server_running(newtab):
-        with stdout_redirected() as out:
-            newtab.newtab('--port 8880')
+        result = _newtabmagic_message(newtab, '--port 8880')
 
-    result = out.getvalue()
     expected = 'Server already running. Port number not changed\n'
     nose.tools.assert_equals(result, expected)
     result = newtab.base_url()
@@ -128,10 +133,8 @@ def test_server_start_stop():
     url = newtab.base_url()
 
     # Start server
-    with stdout_redirected() as out:
-        newtab.newtab('--server start')
+    result = _newtabmagic_message(newtab, '--server start')
 
-    result = out.getvalue()
     expected = ("Starting job # ? in a separate thread.\n"
                 "Server running at {}\n".format(url))
     head, tail = expected.split('?')
@@ -139,10 +142,8 @@ def test_server_start_stop():
     nose.tools.assert_true(result.endswith(tail))
 
     # Stop server
-    with stdout_redirected() as out:
-        newtab.newtab('--server stop')
+    result = _newtabmagic_message(newtab, '--server stop')
 
-    result = out.getvalue()
     expected = 'Server process is terminated.\n'
     nose.tools.assert_equal(result, expected)
 
@@ -151,10 +152,8 @@ def test_server_stop_not_started():
 
     newtab = _get_newtabmagic()
 
-    with stdout_redirected() as out:
-        newtab.newtab('--server stop')
+    result = _newtabmagic_message(newtab, '--server stop')
 
-    result = out.getvalue()
     expected = 'Server not started.\n'
     nose.tools.assert_equals(result, expected)
 
@@ -164,12 +163,10 @@ def test_server_already_started():
     newtab = _get_newtabmagic()
 
     with server_running(newtab):
-        with stdout_redirected() as out:
-            newtab.newtab('--server start')
+        result = _newtabmagic_message(newtab, '--server start')
 
     expected = 'Server already started\n' + \
         'Server running at {}\n'.format(newtab.base_url())
-    result = out.getvalue()
     nose.tools.assert_equals(result, expected)
 
 
@@ -179,11 +176,10 @@ def test_server_already_stopped():
 
     newtab.newtab('--server start')
     newtab.newtab('--server stop')
-    with stdout_redirected() as out:
-        newtab.newtab('--server stop')
+
+    result = _newtabmagic_message(newtab, '--server stop')
 
     expected = 'Server process is already stopped.\n'
-    result = out.getvalue()
     nose.tools.assert_equals(result, expected)
 
 
@@ -192,26 +188,22 @@ def test_server_process_read():
     newtab = _get_newtabmagic()
 
     # Server not running
-    with stdout_redirected() as out:
-        newtab.newtab('--server read')
-    result = out.getvalue()
+    result = _newtabmagic_message(newtab, '--server read')
+
     expected = 'Server stdout: \nServer stderr: \n'
     nose.tools.assert_equals(result, expected)
 
     # Server running
     with server_running(newtab):
         time.sleep(1.0)
-        with stdout_redirected() as out:
-            newtab.newtab('--server read')
-    result = out.getvalue()
+        result = _newtabmagic_message(newtab, '--server read')
+
     expected = 'Server stdout: \nServer stderr: \n'
     nose.tools.assert_equals(result, expected)
 
     # Server stopped
-    with stdout_redirected() as out:
-        newtab.newtab('--server read')
+    result = _newtabmagic_message(newtab, '--server read')
 
-    result = out.getvalue()
     expected = 'Server stdout: \nServer stderr: \n'
     nose.tools.assert_equals(result, expected)
 
@@ -221,21 +213,18 @@ def test_show():
     newtab = _get_newtabmagic(browser='firefox', port=8880)
 
     # Server not running
-    with stdout_redirected() as out:
-        newtab.newtab('--show')
+    result = _newtabmagic_message(newtab, '--show')
 
-    result = out.getvalue().split('\n')
     expected = ['browser: firefox',
                 'server running: False',
                 'server port: 8880',
                 'server root url: http://127.0.0.1:8880/',
                 '']
-    nose.tools.assert_equals(result, expected)
+    nose.tools.assert_equals(result.split('\n'), expected)
 
     # Server running
     with server_running(newtab):
-        with stdout_redirected() as out:
-            newtab.newtab('--show')
+        result = _newtabmagic_message(newtab, '--show')
 
     expected = ['browser: firefox',
                 'server poll: None',
@@ -243,8 +232,7 @@ def test_show():
                 'server port: 8880',
                 'server root url: http://127.0.0.1:8880/',
                 '']
-    result = out.getvalue().split('\n')
-    diff = [line for line in result if line not in expected]
+    diff = [line for line in result.split('\n') if line not in expected]
     nose.tools.assert_equals(len(diff), 1)
     assert diff[0].startswith('server pid: ')
 

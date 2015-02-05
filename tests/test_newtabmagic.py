@@ -124,7 +124,7 @@ def test_set_port_server_running():
 
 def test_server_start_stop():
 
-    newtab = _get_newtabmagic(browser=None)
+    newtab = _get_newtabmagic()
     url = newtab.base_url()
 
     # Start server
@@ -149,7 +149,7 @@ def test_server_start_stop():
 
 def test_server_stop_not_started():
 
-    newtab = _get_newtabmagic(browser=None)
+    newtab = _get_newtabmagic()
 
     with stdout_redirected() as out:
         newtab.newtab('--server stop')
@@ -161,7 +161,7 @@ def test_server_stop_not_started():
 
 def test_server_already_started():
 
-    newtab = _get_newtabmagic(browser=None)
+    newtab = _get_newtabmagic()
 
     with server_running(newtab):
         with stdout_redirected() as out:
@@ -175,7 +175,7 @@ def test_server_already_started():
 
 def test_server_already_stopped():
 
-    newtab = _get_newtabmagic(browser=None)
+    newtab = _get_newtabmagic()
 
     newtab.newtab('--server start')
     newtab.newtab('--server stop')

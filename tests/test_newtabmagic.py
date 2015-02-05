@@ -252,8 +252,7 @@ def test_show():
 def test_newtab_name_argument():
     # Test for a single name argument
 
-    browser = 'firefox'
-    newtab = _get_newtabmagic(browser=browser)
+    newtab = _get_newtabmagic()
     url = newtab.base_url()
 
     with stdout_redirected() as out:
@@ -263,15 +262,14 @@ def test_newtab_name_argument():
     nose.tools.assert_equals(output, '')
 
     result = newtab.command_lines
-    expected = [[browser, url + 'sys.html']]
+    expected = [[newtab.browser, url + 'sys.html']]
     nose.tools.assert_equals(result, expected)
 
 
 def test_newtab_name_arguments():
     # Test for multiple name arguments
 
-    browser = 'firefox'
-    newtab = _get_newtabmagic(browser=browser)
+    newtab = _get_newtabmagic()
     url = newtab.base_url()
 
     with stdout_redirected() as out:
@@ -281,9 +279,9 @@ def test_newtab_name_arguments():
     nose.tools.assert_equals(output, '')
 
     result = newtab.command_lines
-    expected = [[browser, url + 'sys.html'],
-                [browser, url + 'os.html'],
-                [browser, url + 'zip.html']]
+    expected = [[newtab.browser, url + 'sys.html'],
+                [newtab.browser, url + 'os.html'],
+                [newtab.browser, url + 'zip.html']]
     nose.tools.assert_equals(result, expected)
 
 

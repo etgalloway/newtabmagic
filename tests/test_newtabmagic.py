@@ -24,6 +24,10 @@ else:
     from io import StringIO
     from urllib.parse import urlparse
 
+if sys.version_info >= (3, 3):
+    from unittest.mock import patch
+else:
+    from mock import patch
 
 if not IPython.get_ipython():
     from IPython.testing import globalipapp
@@ -71,7 +75,7 @@ def _get_newtabmagic(new_tabs_enabled=False, browser='firefox', port=None):
 
 
 def _newtabmagic_message(newtab, arg):
-    with stdout_redirected() as out:
+    with patch('sys.stdout', StringIO()) as out:
         newtab.newtab(arg)
         msg = out.getvalue()
     return msg

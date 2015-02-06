@@ -282,10 +282,11 @@ def test_newtab_name_arguments():
     output = out.getvalue()
     nose.tools.assert_equals(output, '')
 
-    result = newtab.command_lines
-    expected = [[newtab.browser, url + 'sys.html'],
-                [newtab.browser, url + 'os.html'],
-                [newtab.browser, url + 'zip.html']]
+    result = newtab.command_lines[0]
+    expected = [newtab.browser,
+                url + 'sys.html',
+                url + 'os.html',
+                url + 'zip.html']
     nose.tools.assert_equals(result, expected)
 
 

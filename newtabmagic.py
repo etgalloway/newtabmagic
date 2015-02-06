@@ -138,14 +138,17 @@ class NewTabMagics(Magics):
     def _open_new_tabs(self, names):
         """Open browser tabs for a list of variable names and paths."""
         self._cmds = []
+        urls = []
         for name in names:
             url, msg = self._get_url(name)
             if not url:
                 print(msg)
             else:
-                cmd = [self._browser, url]
-                self._cmds.append(cmd)
-                self._open_new_tab(cmd)
+                urls.append(url)
+        if urls:
+            cmd = [self._browser] + urls
+            self._cmds.append(cmd)
+            self._open_new_tab(cmd)
 
     def _get_url(self, name):
         """Get url associated with name, returning None if not found"""

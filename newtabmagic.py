@@ -81,7 +81,6 @@ class NewTabMagics(Magics):
         super(NewTabMagics, self).__init__(shell)
         self._browser = None
         self._server = ServerProcess()
-        self.new_tabs_enabled = True
         self._cmds = []
 
     @line_magic
@@ -210,8 +209,7 @@ class NewTabMagics(Magics):
     def _open_new_tab(self, cmd):
         """Open a new browser tab by invoking a subprocess."""
         try:
-            if self.new_tabs_enabled:
-                subprocess.Popen(cmd)
+            subprocess.Popen(cmd)
         except OSError:
             msg = "Browser named {} failed to open new tab\n".format(
                 self._browser)

@@ -41,11 +41,10 @@ def server_running(newtab):
         newtab.newtab('--server stop')
 
 
-def _get_newtabmagic(new_tabs_enabled=False, browser='firefox', port=None):
+def _get_newtabmagic(browser='firefox', port=None):
     ip = IPython.get_ipython()
     ip.reset()
     newtab = newtabmagic.NewTabMagics(ip)
-    newtab.new_tabs_enabled = new_tabs_enabled
     if browser is not None:
         newtab.newtab('--browser ' + browser)
     if port is not None:
@@ -78,7 +77,6 @@ def _newtabmagic_UsageError(newtab, args):
 
 
 def _open_new_tab(newtab, args):
-    newtab.new_tabs_enabled = True
     with patch('sys.stdout', StringIO()) as out:
         with patch('subprocess.Popen') as mock_call:
             newtab.newtab(args)
@@ -89,7 +87,6 @@ def _open_new_tab(newtab, args):
 def _newtabmagic_object_page_name(obj):
     """Return path part of help url not including extension."""
     newtab = _get_newtabmagic()
-    newtab.new_tabs_enabled = True
     newtab.shell.push({'obj': obj})
     with patch('subprocess.Popen') as mock_call:
         newtab.newtab('obj')
@@ -295,7 +292,7 @@ def test_name_argument_browser_not_initialized():
 def test_name_argument_browser_does_not_exist():
     # Exception thrown if browser does not exist
 
-    newtab = _get_newtabmagic(new_tabs_enabled=True)
+    newtab = _get_newtabmagic()
     newtab.newtab('--browser nonexistent')
     exception = _newtabmagic_UsageError(newtab, 'sys')
     expected = ('Browser named nonexistent failed to open new tab\n',)

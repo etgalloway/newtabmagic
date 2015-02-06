@@ -92,6 +92,15 @@ def _newtabmagic_UsageError(newtab, args):
     return error
 
 
+def _open_new_tab(newtab, args):
+    newtab.new_tabs_enabled = True
+    with patch('sys.stdout', StringIO()) as out:
+        with patch('subprocess.Popen') as mock_call:
+            newtab.newtab(args)
+        msg = out.getvalue()
+    return msg, mock_call
+
+
 def _newtabmagic_object_page_name(obj):
     """Return path part of help url not including extension."""
 
@@ -269,15 +278,12 @@ def test_newtab_name_argument():
     newtab = _get_newtabmagic()
     url = newtab.base_url()
 
-    with stdout_redirected() as out:
-        newtab.newtab('sys')  # name argument
+    output, mock_call = _open_new_tab(newtab, 'sys')
 
-    output = out.getvalue()
     nose.tools.assert_equals(output, '')
 
-    result = newtab.command_lines
-    expected = [[newtab.browser, url + 'sys.html']]
-    nose.tools.assert_equals(result, expected)
+    args = [newtab.browser, url + 'sys.html']
+    mock_call.assert_called_once_with(args)
 
 
 def test_newtab_name_arguments():
@@ -286,18 +292,16 @@ def test_newtab_name_arguments():
     newtab = _get_newtabmagic()
     url = newtab.base_url()
 
-    with stdout_redirected() as out:
-        newtab.newtab('sys os zip')  # name arguments
+    name_arguments = 'sys os zip'
+    output, mock_call = _open_new_tab(newtab, name_arguments)
 
-    output = out.getvalue()
     nose.tools.assert_equals(output, '')
 
-    result = newtab.command_lines[0]
-    expected = [newtab.browser,
-                url + 'sys.html',
-                url + 'os.html',
-                url + 'zip.html']
-    nose.tools.assert_equals(result, expected)
+    args = [newtab.browser,
+            url + 'sys.html',
+            url + 'os.html',
+            url + 'zip.html']
+    mock_call.assert_called_once_with(args)
 
 
 def test_name_argument_browser_not_initialized():
@@ -324,10 +328,9 @@ def test_name_argument_path_not_object_in_user_namespace():
 
     newtab = _get_newtabmagic()
     assert 'cmath' not in newtab.shell.user_ns
-    newtab.newtab('cmath')
-    result = _newtab_url_name(newtab)
-    expected = 'cmath'
-    nose.tools.assert_equals(expected, result)
+    msg, mock_call = _open_new_tab(newtab, 'cmath')
+    args = [newtab.browser, newtab.base_url() + 'cmath.html']
+    mock_call.assert_called_once_with(args)
 
 
 def test_name_argument_path_object_nonexistent_attribute():
@@ -336,8 +339,8 @@ def test_name_argument_path_object_nonexistent_attribute():
     newtab = _get_newtabmagic()
     newtab.shell.push({'c': C()})
     assert 'c' in newtab.shell.user_ns
-    newtab.newtab('c.non_existent_attribute')
-    nose.tools.assert_equals(newtab.command_lines, [])
+    msg, mock_call = _open_new_tab(newtab, 'c.non_existent_attribute')
+    nose.tools.assert_equals(mock_call.call_count, 0)
 
 
 def test_name_argument_path_nonexistent():
@@ -346,17 +349,15 @@ def test_name_argument_path_nonexistent():
     newtab = _get_newtabmagic()
 
     name_arg = 'does.not.exist'
-    with stdout_redirected() as out:
-        newtab.newtab(name_arg)
-    msg = out.getvalue()
+
+    msg, mock_call = _open_new_tab(newtab, name_arg)
 
     # Error message is printed
-    result = msg
     expected = 'Documentation not found: does.not.exist\n'
-    nose.tools.assert_equals(result, expected)
+    nose.tools.assert_equals(msg, expected)
 
     # New tab not opened
-    nose.tools.assert_equals(newtab.command_lines, [])
+    nose.tools.assert_equals(mock_call.call_count, 0)
 
 
 def test_name_argument_object_module():
@@ -658,11 +659,9 @@ def test_name_argument_object_generator():
     obj = gf()
     assert type(obj).__name__ == 'generator'
 
-    with stdout_redirected() as out:
-        newtab = _get_newtabmagic()
-        newtab.shell.push({'obj': obj})
-        newtab.newtab('obj')
-    result = out.getvalue()
+    newtab = _get_newtabmagic()
+    newtab.shell.push({'obj': obj})
+    result, mock_call = _open_new_tab(newtab, 'obj')
 
     expected = 'Documentation not found: obj\n'
     nose.tools.assert_equals(result, expected)

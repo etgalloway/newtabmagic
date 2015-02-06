@@ -103,12 +103,14 @@ def _open_new_tab(newtab, args):
 
 def _newtabmagic_object_page_name(obj):
     """Return path part of help url not including extension."""
-
     newtab = _get_newtabmagic()
+    newtab.new_tabs_enabled = True
     newtab.shell.push({'obj': obj})
-    newtab.newtab('obj')
-    path = _newtab_url_name(newtab)
-    return path
+    with patch('subprocess.Popen') as mock_call:
+        newtab.newtab('obj')
+    call_args = mock_call.call_args[0][0]
+    url = call_args[1]
+    return url.split('/')[-1][:-5]
 
 
 def _newtab_url_name(newtab):

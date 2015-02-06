@@ -19,10 +19,8 @@ import newtabmagic
 
 if sys.version_info.major == 2:
     from StringIO import StringIO
-    from urlparse import urlparse
 else:
     from io import StringIO
-    from urllib.parse import urlparse
 
 if sys.version_info >= (3, 3):
     from unittest.mock import patch
@@ -32,19 +30,6 @@ else:
 if not IPython.get_ipython():
     from IPython.testing import globalipapp
     globalipapp.start_ipython()
-
-
-@contextlib.contextmanager
-def stdout_redirected(new_target=None):
-    old_target = sys.stdout
-    if new_target is None:
-        sys.stdout = StringIO()
-    else:
-        sys.stdout = new_target
-    try:
-        yield sys.stdout
-    finally:
-        sys.stdout = old_target
 
 
 @contextlib.contextmanager
@@ -111,14 +96,6 @@ def _newtabmagic_object_page_name(obj):
     call_args = mock_call.call_args[0][0]
     url = call_args[1]
     return url.split('/')[-1][:-5]
-
-
-def _newtab_url_name(newtab):
-    """Return name part of url."""
-    url = newtab.command_lines[0][1]
-    path = urlparse(url).path
-    # drop leading '/' and trailing '.html'
-    return path[1:-5]
 
 
 def test_set_browser():

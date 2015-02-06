@@ -81,7 +81,6 @@ class NewTabMagics(Magics):
         super(NewTabMagics, self).__init__(shell)
         self._browser = None
         self._server = ServerProcess()
-        self._cmds = []
 
     @line_magic
     @magic_arguments()
@@ -136,7 +135,6 @@ class NewTabMagics(Magics):
 
     def _open_new_tabs(self, names):
         """Open browser tabs for a list of variable names and paths."""
-        self._cmds = []
         urls = []
         for name in names:
             url, msg = self._get_url(name)
@@ -146,7 +144,6 @@ class NewTabMagics(Magics):
                 urls.append(url)
         if urls:
             cmd = [self._browser] + urls
-            self._cmds.append(cmd)
             self._open_new_tab(cmd)
 
     def _get_url(self, name):
@@ -189,11 +186,6 @@ class NewTabMagics(Magics):
         else:
             obj = None
         return obj
-
-    @property
-    def command_lines(self):
-        """Command lines used (most recently) to invoke subproccesses."""
-        return self._cmds
 
     @property
     def browser(self):

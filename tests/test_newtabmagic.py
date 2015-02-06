@@ -92,6 +92,16 @@ def _newtabmagic_UsageError(newtab, args):
     return error
 
 
+def _newtabmagic_object_page_name(obj):
+    """Return path part of help url not including extension."""
+
+    newtab = _get_newtabmagic()
+    newtab.shell.push({'obj': obj})
+    newtab.newtab('obj')
+    path = _newtab_url_name(newtab)
+    return path
+
+
 def _newtab_url_name(newtab):
     """Return name part of url."""
     url = newtab.command_lines[0][1]
@@ -347,16 +357,6 @@ def test_name_argument_path_nonexistent():
 
     # New tab not opened
     nose.tools.assert_equals(newtab.command_lines, [])
-
-
-def _newtabmagic_object_page_name(obj):
-    """Return path part of help url not including extension."""
-
-    newtab = _get_newtabmagic()
-    newtab.shell.push({'obj': obj})
-    newtab.newtab('obj')
-    path = _newtab_url_name(newtab)
-    return path
 
 
 def test_name_argument_object_module():

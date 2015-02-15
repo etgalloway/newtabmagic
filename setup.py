@@ -1,6 +1,6 @@
 """Setup file for newtabmagic."""
 
-from distutils.core import setup
+from setuptools import setup
 from newtabmagic import __version__
 
 description = 'IPython magics for viewing pydoc help pages in the browser'

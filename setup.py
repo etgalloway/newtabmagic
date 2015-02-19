@@ -9,7 +9,6 @@ with open('README.rst') as file:
     long_description = file.read()
 
 _classifiers = [
-    'Development Status :: 3 - Alpha',
     'Framework :: IPython',
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',

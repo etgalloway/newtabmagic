@@ -20,6 +20,8 @@ _classifiers = [
     'Programming Language :: Python :: 3.4',
     ]
 
+keywords = 'CLI documentation IPython pydoc'
+
 setup(
     name='newtabmagic',
     version=__version__,
@@ -30,6 +32,7 @@ setup(
     long_description=long_description,
     url='https://github.com/etgalloway/newtabmagic',
     classifiers=_classifiers,
+    keywords=keywords,
     zip_safe=False,
     install_requires=['ipython']
     )

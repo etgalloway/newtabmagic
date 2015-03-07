@@ -3,7 +3,7 @@
 from setuptools import setup
 from newtabmagic import __version__
 
-description = 'IPython magics for viewing pydoc help pages in the browser'
+description = 'IPython CLI for viewing documentation in the browser'
 
 with open('README.rst') as file:
     long_description = file.read()

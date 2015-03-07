@@ -203,8 +203,8 @@ class NewTabMagics(Magics):
         try:
             subprocess.Popen(cmd)
         except OSError:
-            msg = "Browser named {} failed to open new tab\n".format(
-                self._browser)
+            msg = "the command '{}' raised an OSError\n"
+            msg = msg.format(' '.join(cmd))
             raise UsageError(msg)
 
     def _show(self):

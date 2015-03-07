@@ -295,7 +295,9 @@ def test_name_argument_browser_does_not_exist():
     newtab = _get_newtabmagic()
     newtab.newtab('--browser nonexistent')
     exception = _newtabmagic_UsageError(newtab, 'sys')
-    expected = ('Browser named nonexistent failed to open new tab\n',)
+    msg = "the command 'nonexistent {}sys.html' raised an OSError\n"
+    msg = msg.format(newtab.base_url())
+    expected = (msg,)
     nose.tools.assert_equals(expected, exception.args)
 
 

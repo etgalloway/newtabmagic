@@ -9,6 +9,7 @@ To run tests:
 import contextlib
 import inspect
 import nose
+import pydoc
 import socket
 import sys
 import time
@@ -309,6 +310,24 @@ def test_name_argument_path_not_object_in_user_namespace():
     nose.tools.assert_equals(msg, "")
     args = [newtab.browser, newtab.base_url + 'cmath.html']
     mock_call.assert_called_once_with(args)
+
+
+def test_name_argument_object_attribute():
+    # Name argument returns None when passed to pydoc.locate.
+    # Attribute contains more than one dot
+
+    obj = IPython
+    arg = "obj.core.debugger.Tracer"
+    assert pydoc.locate(arg) is None
+    assert arg.count('.') > 1
+
+    newtab = _get_newtabmagic()
+    newtab.shell.push({'obj': obj})
+    msg, mock_call = _open_new_tab(newtab, arg)
+    nose.tools.assert_equals(msg, "")
+    result = mock_call.call_args[0][0][1]
+    url = newtab.base_url + "IPython.core.debugger.Tracer.html"
+    nose.tools.assert_equals(result, url)
 
 
 def test_name_argument_path_object_nonexistent_attribute():

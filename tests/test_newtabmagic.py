@@ -306,6 +306,7 @@ def test_name_argument_path_not_object_in_user_namespace():
     newtab = _get_newtabmagic()
     assert 'cmath' not in newtab.shell.user_ns
     msg, mock_call = _open_new_tab(newtab, 'cmath')
+    nose.tools.assert_equals(msg, "")
     args = [newtab.browser, newtab.base_url + 'cmath.html']
     mock_call.assert_called_once_with(args)
 
@@ -317,6 +318,8 @@ def test_name_argument_path_object_nonexistent_attribute():
     newtab.shell.push({'c': C()})
     assert 'c' in newtab.shell.user_ns
     msg, mock_call = _open_new_tab(newtab, 'c.non_existent_attribute')
+    expected = 'Documentation not found: c.non_existent_attribute\n'
+    nose.tools.assert_equals(msg, expected)
     nose.tools.assert_equals(mock_call.call_count, 0)
 
 
@@ -638,10 +641,11 @@ def test_name_argument_object_generator():
 
     newtab = _get_newtabmagic()
     newtab.shell.push({'obj': obj})
-    result, mock_call = _open_new_tab(newtab, 'obj')
+    msg, mock_call = _open_new_tab(newtab, 'obj')
 
     expected = 'Documentation not found: obj\n'
-    nose.tools.assert_equals(result, expected)
+    nose.tools.assert_equals(msg, expected)
+    nose.tools.assert_equals(mock_call.call_count, 0)
 
 
 def test_ServerProcess_port():

@@ -60,6 +60,7 @@ import socket
 import subprocess
 import sys
 import time
+import webbrowser
 
 
 from IPython import get_ipython
@@ -125,27 +126,19 @@ class NewTabMagics(Magics):
             self.browser = args.browser
 
         if args.names:
-            if self._browser:
-                self._open_new_tabs(args.names)
-            else:
-                msg = "Browser not initialized\n"
-                raise UsageError(msg)
+            self._open_new_tabs(args.names)
 
         if args.show:
             self._show()
 
     def _open_new_tabs(self, names):
         """Open browser tabs for a list of variable names and paths."""
-        urls = []
         for name in names:
             url, msg = self._get_url(name)
-            if not url:
-                print(msg)
+            if url:
+                self._open_new_tab(url)
             else:
-                urls.append(url)
-        if urls:
-            cmd = [self._browser] + urls
-            self._open_new_tab(cmd)
+                print(msg)
 
     def _get_url(self, name):
         """Get url associated with name, returning None if not found"""
@@ -175,14 +168,18 @@ class NewTabMagics(Magics):
                 page_name = None
         return page_name
 
-    def _open_new_tab(self, cmd):
-        """Open a new browser tab by invoking a subprocess."""
-        try:
-            subprocess.Popen(cmd)
-        except OSError:
-            msg = "the command '{}' raised an OSError\n"
-            msg = msg.format(' '.join(cmd))
-            raise UsageError(msg)
+    def _open_new_tab(self, url):
+        """Open a new tab in the browser."""
+        if self._browser:
+            cmd = [self._browser, url]
+            try:
+                subprocess.Popen(cmd)
+            except OSError:
+                msg = "the command '{}' raised an OSError\n"
+                msg = msg.format(' '.join(cmd))
+                raise UsageError(msg)
+        else:
+            webbrowser.open_new_tab(url)
 
     def _show(self):
         """Show state of magic."""

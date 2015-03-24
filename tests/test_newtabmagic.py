@@ -259,27 +259,31 @@ def test_newtab_name_arguments():
     # Test for multiple name arguments
 
     newtab = _get_newtabmagic()
-    url = newtab.base_url
 
-    name_arguments = 'sys os zip'
-    output, mock_call = _open_new_tab(newtab, name_arguments)
+    names_string = 'sys os zip'
+    output, mock_call = _open_new_tab(newtab, names_string)
 
     nose.tools.assert_equals(output, '')
 
-    args = [newtab.browser,
-            url + 'sys.html',
-            url + 'os.html',
-            url + 'zip.html']
-    mock_call.assert_called_once_with(args)
+    names = ['sys', 'os', 'zip']
+    base_url = newtab.base_url
+    for mock_args, name in zip(mock_call.call_args_list, names):
+        mock_cmd = mock_args[0][0]
+        expected = [newtab.browser, base_url + name + '.html']
+        nose.tools.assert_equals(mock_cmd, expected)
 
 
-def test_name_argument_browser_not_initialized():
-    # Exception thrown if browser not initialized
+def test_name_argument_browser_is_None():
+    # Use webbrowser.open_new_tab if browser is None.
 
     newtab = _get_newtabmagic(browser=None)
-    exception = _newtabmagic_UsageError(newtab, 'sys')
-    expected = ('Browser not initialized\n',)
-    nose.tools.assert_equals(exception.args, expected)
+    with patch('sys.stdout', StringIO()) as out:
+        with patch('webbrowser.open_new_tab') as mock_call:
+            newtab.newtab("sys")
+        msg = out.getvalue()
+    nose.tools.assert_equals(msg, "")
+    arg = newtab.base_url + 'sys.html'
+    mock_call.assert_called_once_with(arg)
 
 
 def test_name_argument_browser_does_not_exist():

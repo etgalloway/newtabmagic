@@ -56,8 +56,9 @@ __version__ = '0.1'
 import inspect
 import os
 import pydoc
-import sys
+import socket
 import subprocess
+import sys
 import time
 
 
@@ -114,7 +115,7 @@ class NewTabMagics(Magics):
 
         args = parse_argstring(self.newtab, line)
 
-        if args.port:
+        if args.port is not None:
             self._server.port = args.port
 
         if args.server:
@@ -240,12 +241,14 @@ class ServerProcess(object):
 
     def __init__(self):
         self._process = None
-        self._port = 8880
+        self._port = 0
 
     def start(self):
         """Start server if not previously started."""
         msg = ''
         if not self.running():
+            if self._port == 0:
+                self._port = _port_not_in_use()
             self._process = start_server_background(self._port)
         else:
             msg = 'Server already started\n'
@@ -571,6 +574,15 @@ def start_server_background(port):
     ip.run_cell_magic("script", line, cell)
 
     return ip.user_ns['proc']
+
+
+def _port_not_in_use():
+    """Use the port 0 trick to find a port not in use."""
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    port = 0
+    s.bind(('', port))
+    _, port = s.getsockname()
+    return port
 
 
 def load_ipython_extension(ip):

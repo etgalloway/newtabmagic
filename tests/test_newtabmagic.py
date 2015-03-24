@@ -10,7 +10,6 @@ import contextlib
 import inspect
 import nose
 import pydoc
-import socket
 import sys
 import time
 
@@ -49,12 +48,6 @@ def _get_newtabmagic(browser='firefox', port=None):
     if browser is not None:
         newtab.newtab('--browser ' + browser)
     if port is not None:
-        newtab.newtab('--port ' + str(port))
-    else:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        port = 0
-        s.bind(('', port))
-        _, port = s.getsockname()
         newtab.newtab('--port ' + str(port))
     return newtab
 

@@ -187,17 +187,6 @@ class NewTabMagics(Magics):
             obj = None
         return obj
 
-    @property
-    def browser(self):
-        """Name of browser used to open new tabs."""
-        return self._browser
-
-    @browser.setter
-    def browser(self, args):
-        """Set browser by command name or path."""
-        path = ' '.join(args).strip('\'\"')
-        self._browser = path
-
     def _open_new_tab(self, cmd):
         """Open a new browser tab by invoking a subprocess."""
         try:
@@ -214,10 +203,6 @@ class NewTabMagics(Magics):
         print(msg, end='')
         self._server.show()
 
-    def base_url(self):
-        """Base url for pydoc server."""
-        return self._server.url()
-
     def _pydoc_url(self, page):
         """Return url for pydoc help page."""
         return self.base_url() + page + '.html'
@@ -232,6 +217,21 @@ class NewTabMagics(Magics):
             out, err = self._server.read()
             print('Server stdout: {}'.format(out))
             print('Server stderr: {}'.format(err))
+
+    def base_url(self):
+        """Base url for pydoc server."""
+        return self._server.url()
+
+    @property
+    def browser(self):
+        """Name of browser used to open new tabs."""
+        return self._browser
+
+    @browser.setter
+    def browser(self, args):
+        """Set browser by command name or path."""
+        path = ' '.join(args).strip('\'\"')
+        self._browser = path
 
 
 class ServerProcess(object):

@@ -156,7 +156,7 @@ class NewTabMagics(Magics):
         msg = ''
         page = self._get_pydoc_page_name(name)
         if page:
-            url = self._pydoc_url(page)
+            url = self.base_url + page + '.html'
         else:
             url = None
             msg = 'Documentation not found: {}'.format(name)
@@ -190,10 +190,6 @@ class NewTabMagics(Magics):
         msg += 'browser: {}\n'.format(self._browser)
         print(msg, end='')
         self._server.show()
-
-    def _pydoc_url(self, page):
-        """Return url for pydoc help page."""
-        return self.base_url + page + '.html'
 
     def _server_interact(self, cmd):
         """Interact with the pydoc server process."""

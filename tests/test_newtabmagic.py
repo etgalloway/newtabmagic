@@ -115,9 +115,9 @@ def test_set_browser():
 def test_set_port():
     newtab = _get_newtabmagic()
 
-    root_original = newtab.base_url()
+    root_original = newtab.base_url
     newtab.newtab('--port 9999')
-    result = newtab.base_url()
+    result = newtab.base_url
     expected = 'http://127.0.0.1:9999/'
     assert result != root_original
     nose.tools.assert_equals(result, expected)
@@ -127,13 +127,13 @@ def test_set_port_server_running():
     # Setting the port number should fail if the server is running
 
     newtab = _get_newtabmagic(port=9999)
-    root_original = newtab.base_url()
+    root_original = newtab.base_url
     with server_running(newtab):
         result = _newtabmagic_message(newtab, '--port 8880')
 
     expected = 'Server already running. Port number not changed\n'
     nose.tools.assert_equals(result, expected)
-    result = newtab.base_url()
+    result = newtab.base_url
     expected = root_original
     nose.tools.assert_equals(result, expected)
 
@@ -141,13 +141,12 @@ def test_set_port_server_running():
 def test_server_start_stop():
 
     newtab = _get_newtabmagic()
-    url = newtab.base_url()
 
     # Start server
     result = _newtabmagic_message(newtab, '--server start')
 
     expected = ("Starting job # ? in a separate thread.\n"
-                "Server running at {}\n".format(url))
+                "Server running at {}\n".format(newtab.base_url))
     head, tail = expected.split('?')
     nose.tools.assert_true(result.startswith(head))
     nose.tools.assert_true(result.endswith(tail))
@@ -177,7 +176,7 @@ def test_server_already_started():
         result = _newtabmagic_message(newtab, '--server start')
 
     expected = 'Server already started\n' + \
-        'Server running at {}\n'.format(newtab.base_url())
+        'Server running at {}\n'.format(newtab.base_url)
     nose.tools.assert_equals(result, expected)
 
 
@@ -252,7 +251,7 @@ def test_newtab_name_argument():
     # Test for a single name argument
 
     newtab = _get_newtabmagic()
-    url = newtab.base_url()
+    url = newtab.base_url
 
     output, mock_call = _open_new_tab(newtab, 'sys')
 
@@ -266,7 +265,7 @@ def test_newtab_name_arguments():
     # Test for multiple name arguments
 
     newtab = _get_newtabmagic()
-    url = newtab.base_url()
+    url = newtab.base_url
 
     name_arguments = 'sys os zip'
     output, mock_call = _open_new_tab(newtab, name_arguments)
@@ -296,7 +295,7 @@ def test_name_argument_browser_does_not_exist():
     newtab.newtab('--browser nonexistent')
     exception = _newtabmagic_UsageError(newtab, 'sys')
     msg = "the command 'nonexistent {}sys.html' raised an OSError\n"
-    msg = msg.format(newtab.base_url())
+    msg = msg.format(newtab.base_url)
     expected = (msg,)
     nose.tools.assert_equals(expected, exception.args)
 
@@ -307,7 +306,7 @@ def test_name_argument_path_not_object_in_user_namespace():
     newtab = _get_newtabmagic()
     assert 'cmath' not in newtab.shell.user_ns
     msg, mock_call = _open_new_tab(newtab, 'cmath')
-    args = [newtab.browser, newtab.base_url() + 'cmath.html']
+    args = [newtab.browser, newtab.base_url + 'cmath.html']
     mock_call.assert_called_once_with(args)
 
 

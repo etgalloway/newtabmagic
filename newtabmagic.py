@@ -205,7 +205,7 @@ class NewTabMagics(Magics):
 
     def _pydoc_url(self, page):
         """Return url for pydoc help page."""
-        return self.base_url() + page + '.html'
+        return self.base_url + page + '.html'
 
     def _server_interact(self, cmd):
         """Interact with the pydoc server process."""
@@ -218,6 +218,7 @@ class NewTabMagics(Magics):
             print('Server stdout: {}'.format(out))
             print('Server stderr: {}'.format(err))
 
+    @property
     def base_url(self):
         """Base url for pydoc server."""
         return self._server.url()

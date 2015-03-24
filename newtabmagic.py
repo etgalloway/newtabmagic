@@ -164,7 +164,7 @@ class NewTabMagics(Magics):
 
     def _get_pydoc_page_name(self, path):
         """Return name of pydoc page, or None if path is not valid."""
-        obj = self._get_user_ns_object(path)
+        obj = _get_user_ns_object(self.shell, path)
         if obj is not None:
             page_name = _get_object_pydoc_page_name(obj)
         else:
@@ -174,19 +174,6 @@ class NewTabMagics(Magics):
             else:
                 page_name = None
         return page_name
-
-    def _get_user_ns_object(self, path):
-        """Get object associated with path, provided the first
-        part of the path is the name of an object in the user
-        namespace.  Return None if the object does not exist."""
-        parts = [part for part in path.split('.') if part]
-        if parts[0] in self.shell.user_ns:
-            obj = self.shell.user_ns[parts[0]]
-            if parts[1:]:
-                obj = _getattr_path(obj, parts[1:])
-        else:
-            obj = None
-        return obj
 
     def _open_new_tab(self, cmd):
         """Open a new browser tab by invoking a subprocess."""
@@ -498,6 +485,20 @@ def _fully_qualified_name_method_py2(obj):
             cls = obj.__self__.__class__.__name__
 
     return module + '.' + cls + '.' + obj.__func__.__name__
+
+
+def _get_user_ns_object(shell, path):
+    """Get object associated with path, provided the first
+    part of the path is the name of an object in the user
+    namespace.  Return None if the object does not exist."""
+    parts = [part for part in path.split('.') if part]
+    if parts[0] in shell.user_ns:
+        obj = shell.user_ns[parts[0]]
+        if parts[1:]:
+            obj = _getattr_path(obj, parts[1:])
+    else:
+        obj = None
+    return obj
 
 
 def _getattr_path(obj, attrs):

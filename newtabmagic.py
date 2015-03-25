@@ -161,8 +161,7 @@ class NewTabMagics(Magics):
         if obj is not None:
             page_name = _get_object_pydoc_page_name(obj)
         else:
-            obj = pydoc.locate(path)
-            if obj is not None:
+            if pydoc.locate(path) is not None:
                 page_name = path
             else:
                 page_name = None

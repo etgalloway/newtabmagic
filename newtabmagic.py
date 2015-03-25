@@ -40,31 +40,32 @@ class NewTabMagics(Magics):
     @magic_arguments()
     @argument(
         'names',
-        help='Variable names and dotted paths, separated by spaces.',
+        help=("Python paths or names of objects "
+              "used to open tabs in the browser."),
         nargs='*'
     )
     @argument(
         '--browser',
-        help='Set name of browser used to open new tabs.',
+        help="Specify browser used to open tabs.",
         nargs='+'
     )
     @argument(
         '--port',
+        help='Specify port used by pydoc server.',
         type=int,
-        help='Set port used by the pydoc server.'
     )
     @argument(
         '--server',
-        help='Interact with the pydoc server process.',
+        help='Interact with pydoc server process.',
         choices=['stop', 'start', 'read']
     )
     @argument(
         '--show',
-        help='Show state of magic.',
+        help="Show state.",
         action='store_true'
     )
     def newtab(self, line):
-        """Line magic for opening new browser tabs."""
+        """View documentation in the browser."""
 
         args = parse_argstring(self.newtab, line)
 

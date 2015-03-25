@@ -474,17 +474,17 @@ def _fully_qualified_name_method_py2(obj):
 
 
 def _get_user_ns_object(shell, path):
-    """Get object associated with path, provided the first
-    part of the path is the name of an object in the user
-    namespace.  Return None if the object does not exist."""
-    parts = [part for part in path.split('.') if part]
-    if parts[0] in shell.user_ns:
-        obj = shell.user_ns[parts[0]]
-        if parts[1:]:
-            obj = _getattr_path(obj, parts[1:])
-    else:
-        obj = None
-    return obj
+    """Get object from the user namespace, given a path containing
+    zero or more dots.  Return None if the path is not valid.
+    """
+    parts = path.split('.')
+    name, attr = parts[0], parts[1:]
+    if name in shell.user_ns:
+        if attr:
+            return _getattr_path(shell.user_ns[name], attr)
+        else:
+            return shell.user_ns[name]
+    return None
 
 
 def _getattr_path(obj, attrs):

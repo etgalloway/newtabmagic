@@ -141,10 +141,6 @@ class NewTabMagics(Magics):
                 print(msg)
 
     def _get_url(self, name):
-        """Get url associated with name, returning None if not found"""
-        return self._get_pydoc_url(name)
-
-    def _get_pydoc_url(self, name):
         """Get pydoc url for name of variable or path."""
         msg = ''
         page = self._get_pydoc_page_name(name)

@@ -134,22 +134,20 @@ class NewTabMagics(Magics):
     def _open_new_tabs(self, names):
         """Open browser tabs for a list of variable names and paths."""
         for name in names:
-            url, msg = self._get_url(name)
+            url = self._get_url(name)
             if url:
                 self._open_new_tab(url)
             else:
-                print(msg)
+                print('Documentation not found: {}'.format(name))
 
     def _get_url(self, name):
         """Get pydoc url for name of variable or path."""
-        msg = ''
         page = self._get_pydoc_page_name(name)
         if page:
             url = self.base_url + page + '.html'
         else:
             url = None
-            msg = 'Documentation not found: {}'.format(name)
-        return url, msg
+        return url
 
     def _get_pydoc_page_name(self, path):
         """Return name of pydoc page, or None if path is not valid."""

@@ -54,6 +54,7 @@ from __future__ import print_function
 __version__ = '0.1'
 
 import inspect
+import operator
 import os
 import pydoc
 import socket
@@ -477,31 +478,25 @@ def _get_user_ns_object(shell, path):
     """Get object from the user namespace, given a path containing
     zero or more dots.  Return None if the path is not valid.
     """
-    parts = path.split('.')
+    parts = path.split('.', 1)
     name, attr = parts[0], parts[1:]
     if name in shell.user_ns:
         if attr:
-            return _getattr_path(shell.user_ns[name], attr)
+            try:
+                return _getattr(shell.user_ns[name], attr[0])
+            except AttributeError:
+                return None
         else:
             return shell.user_ns[name]
     return None
 
 
-def _getattr_path(obj, attrs):
-    """Get a named attribute from an object, returning None if the
-    attribute does not exist.
-
-    Keyword Arguments:
-    attrs -- a list of attributes obtained from a path by applying
-                String.split('.')
+def _getattr(obj, attr):
+    """Get a named attribute from an object, where attr is a string
+    that may contain dots.
     """
-
-    try:
-        for attr in attrs:
-            obj = getattr(obj, attr)
-    except AttributeError:
-        obj = None
-    return obj
+    f = operator.attrgetter(attr)
+    return f(obj)
 
 
 def _stop_process(p, name):

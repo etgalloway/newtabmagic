@@ -89,21 +89,25 @@ def _newtabmagic_object_page_name(obj):
     return url.split('/')[-1][:-5]
 
 
-def test_set_browser():
+def test_browser_argument():
 
-    paths = [
+    browsers = [
         'chrome',
         'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
         'C:/Program Files (x86)/Google/Chrome/Application/chrome.exe']
 
-    for path in paths:
-        for format_str in ['{}', "'{}'", '"{}"']:
-            browser_arg = format_str.format(path)
-            newtab = _get_newtabmagic(browser=None)
-            newtab.newtab('--browser ' + browser_arg)
-            result = newtab.browser
-            expected = path
-            nose.tools.assert_equals(result, expected)
+    for browser in browsers:
+        for s in ['{}', "'{}'", '"{}"']:
+            browser_arg = s.format(browser)
+            _check_browser_argument(browser_arg, browser)
+
+
+def _check_browser_argument(browser_arg, browser):
+    newtab = _get_newtabmagic()
+    previous = newtab.browser
+    newtab.newtab('--browser ' + browser_arg)
+    result = newtab.browser
+    assert result == browser and result != previous
 
 
 def test_set_port():

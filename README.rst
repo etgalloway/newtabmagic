@@ -1,75 +1,51 @@
+===========
 newtabmagic
 ===========
 
-An IPython magic for viewing pydoc help pages in the browser.
+newtabmagic is an `IPython`_ CLI for viewing `pydoc`_ documentation in
+the browser.
 
-Viewing Pydoc Help Pages
-------------------------
+.. _pydoc: https://docs.python.org/3/library/pydoc.html
+.. _IPython: http://ipython.org/
 
-Help pages can opened by providing a dotted path:
+Install
+=======
 
-.. code:: python
+As a Python package:
 
-    In [1]: %newtab IPython.core.debugger.Tracer
+.. code::
 
-Or by providing the name of an object:
+    $ pip install newtabmagic
 
-.. code:: python
+As an IPython extension:
 
-    In [1]: import IPython
-    In [2]: db = IPython.core.debugger
-    In [3]: %newtab db.Tracer
-
-Installation
-------------
-
-To install :code:`newtabmagic`:
-
-.. code:: python
+.. code::
 
     In [1]: %install_ext https://raw.github.com/etgalloway/newtabmagic/master/newtabmagic.py
 
-Startup
--------
+Use
+===
 
-To load :code:`newtabmagic`:
+Load the extension:
 
-.. code:: python
+.. code::
 
     In [1]: %load_ext newtabmagic
 
-The browser used to open new tabs needs to be specified.  To specify by
-command name:
+Start the pydoc server:
 
-.. code:: python
+.. code::
 
-    In [2]: %newtab --browser firefox
+    In [2]: %newtab --server start
+    Starting job # 0 in a separate thread.
+    Server running at http://127.0.0.1:63146/
 
-To specify by path:
+View documentation in the browser:
 
-.. code:: python
+.. code::
 
-    In [2]: %newtab --browser C:/Program Files (x86)/Mozilla Firefox/firefox.exe
+    In [3]: %newtab IPython.core.debugger.Tracer
 
-To set the pydoc server port:
-
-.. code:: python
-
-    In [3]: %newtab --port 8880
-
-To start the pydoc server:
-
-.. code:: python
-
-    In [4]: %newtab --server start
-
-Shutdown
---------
-
-Shutting down IPython stops the pydoc server.
-
-To stop the server without shutting down IPython:
-
-.. code:: python
-
-    In [1]: %newtab --server stop
+    In [4]: import IPython
+    In [5]: tracer = IPython.core.debugger
+    In [6]: %newtab tracer

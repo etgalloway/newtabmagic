@@ -47,5 +47,5 @@ View documentation in the browser:
     In [3]: %newtab IPython.core.debugger.Tracer
 
     In [4]: import IPython
-    In [5]: tracer = IPython.core.debugger
+    In [5]: tracer = IPython.core.debugger.Tracer
     In [6]: %newtab tracer

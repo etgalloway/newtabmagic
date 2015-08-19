@@ -647,27 +647,6 @@ def test_name_argument_object_nested_class_method():
     nose.tools.assert_equals(_newtabmagic_object_page_name(obj), expected)
 
 
-def gf():
-    """generator function"""
-    yield
-
-
-def test_name_argument_object_generator():
-    # Name argument object is a generator.
-    # Introspection not supported for generators prior to Python 3.5.
-
-    obj = gf()
-    assert type(obj).__name__ == 'generator'
-
-    newtab = _get_newtabmagic()
-    newtab.shell.push({'obj': obj})
-    msg, mock_call = _open_new_tab(newtab, 'obj')
-
-    expected = 'Documentation not found: obj\n'
-    nose.tools.assert_equals(msg, expected)
-    nose.tools.assert_equals(mock_call.call_count, 0)
-
-
 def test_ServerProcess_port():
 
     process = newtabmagic.ServerProcess()

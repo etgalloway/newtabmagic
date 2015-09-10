@@ -34,5 +34,5 @@ setup(
     classifiers=_classifiers,
     keywords=keywords,
     zip_safe=False,
-    install_requires=['ipython']
+    install_requires=['ipython', 'fullqualname'],
     )

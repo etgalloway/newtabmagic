@@ -243,11 +243,17 @@ def _get_object_pydoc_page_name(obj):
     built-in module."""
     page_name = _fully_qualified_name(obj)
     if page_name is not None:
-        if page_name.startswith('builtins.'):
-            page_name = page_name[len('builtins.'):]
-        elif page_name.startswith('__builtin__.'):
-            page_name = page_name[len('__builtin__.'):]
+        page_name = _remove_builtin_prefix(page_name)
     return page_name
+
+
+def _remove_builtin_prefix(name):
+    """Strip name of builtin module from start of name."""
+    if name.startswith('builtins.'):
+        return name[len('builtins.'):]
+    elif name.startswith('__builtin__.'):
+        return name[len('__builtin__.'):]
+    return name
 
 
 def _fully_qualified_name(obj):

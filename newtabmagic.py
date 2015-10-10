@@ -5,6 +5,7 @@ from __future__ import print_function
 __version__ = '0.2.0.dev0'
 
 import inspect
+import fullqualname
 import operator
 import os
 import pydoc
@@ -241,9 +242,9 @@ class ServerProcess(object):
 def _get_object_pydoc_page_name(obj):
     """Returns fully qualified name, including module name, except for the
     built-in module."""
-    page_name = _fully_qualified_name(obj)
+    page_name = fullqualname.fullqualname(obj)
     if page_name is not None:
-        page_name = _remove_builtin_prefix(page_name)
+       page_name = _remove_builtin_prefix(page_name)
     return page_name
 
 
@@ -254,182 +255,6 @@ def _remove_builtin_prefix(name):
     elif name.startswith('__builtin__.'):
         return name[len('__builtin__.'):]
     return name
-
-
-def _fully_qualified_name(obj):
-    """Returns fully qualified name, or None if introspection not supported."""
-    if sys.version_info >= (3,):
-        return _fully_qualified_name_py3(obj)
-    else:
-        return _fully_qualified_name_py2(obj)
-
-
-def _fully_qualified_name_py3(obj):
-    """Returns fully qualified name for Python 3."""
-
-    if type(obj).__name__ == 'builtin_function_or_method':
-
-        return _fully_qualified_name_builtin_py3(obj)
-
-    elif type(obj).__name__ == 'function':
-
-        return _fully_qualified_name_function_py3(obj)
-
-    elif type(obj).__name__ == 'generator':
-        # Introspection not supported for generators prior to Python 3.5.
-        return None
-
-    elif type(obj).__name__ in ['member_descriptor',
-                                'wrapper_descriptor', 'method_descriptor']:
-
-        return obj.__objclass__.__module__ + '.' + obj.__qualname__
-
-    elif type(obj).__name__ == 'method':
-
-        return _fully_qualified_name_method_py3(obj)
-
-    elif type(obj).__name__ == 'method-wrapper':
-
-        return _fully_qualified_name_py3(obj.__self__) + '.' + obj.__name__
-
-    elif type(obj).__name__ == 'module':
-
-        return obj.__name__
-
-    elif type(obj).__name__ == 'property':
-
-        return obj.fget.__module__ + '.' + obj.fget.__qualname__
-
-    elif inspect.isclass(obj):
-
-        return obj.__module__ + '.' + obj.__qualname__
-
-    return obj.__class__.__module__ + '.' + obj.__class__.__qualname__
-
-
-def _fully_qualified_name_builtin_py3(obj):
-    """Fully qualified name in Python 3 for 'builtin_function_or_method'
-    objects.
-    """
-
-    if obj.__module__ is not None:
-        # built-in functions
-        module = obj.__module__
-    else:
-        # built-in methods
-        if inspect.isclass(obj.__self__):
-            module = obj.__self__.__module__
-        else:
-            module = obj.__self__.__class__.__module__
-
-    return module + '.' + obj.__qualname__
-
-
-def _fully_qualified_name_function_py3(obj):
-    """Fully qualified name in Python 3 for 'function' objects.
-    """
-
-    if hasattr(obj, "__wrapped__"):
-        qualname = obj.__wrapped__.__qualname__
-    else:
-        qualname = obj.__qualname__
-
-    return obj.__module__ + '.' + qualname
-
-
-def _fully_qualified_name_method_py3(obj):
-    """Fully qualified name in Python 3 for 'method' objects.
-    """
-
-    if inspect.isclass(obj.__self__):
-        cls = obj.__self__.__qualname__
-    else:
-        cls = obj.__self__.__class__.__qualname__
-
-    return obj.__self__.__module__ + '.' + cls + '.' + obj.__name__
-
-
-def _fully_qualified_name_py2(obj):
-    """Fully qualified name for Python 2."""
-
-    if type(obj).__name__ == 'builtin_function_or_method':
-
-        return _fully_qualified_name_builtin_py2(obj)
-
-    elif type(obj).__name__ == 'function':
-
-        return obj.__module__ + '.' + obj.__name__
-
-    elif type(obj).__name__ == 'generator':
-        # Introspection not supported for generators prior to Python 3.5.
-        return None
-
-    elif type(obj).__name__ in ['member_descriptor',
-                                'wrapper_descriptor', 'method_descriptor']:
-
-        return (obj.__objclass__.__module__ + '.' +
-                obj.__objclass__.__name__ + '.' +
-                obj.__name__)
-
-    elif type(obj).__name__ == 'instancemethod':
-
-        return _fully_qualified_name_method_py2(obj)
-
-    elif type(obj).__name__ == 'method-wrapper':
-
-        return _fully_qualified_name_py2(obj.__self__) + '.' + obj.__name__
-
-    elif type(obj).__name__ == 'module':
-
-        return obj.__name__
-
-    elif inspect.isclass(obj):
-
-        return obj.__module__ + '.' + obj.__name__
-
-    return obj.__class__.__module__ + '.' + obj.__class__.__name__
-
-
-def _fully_qualified_name_builtin_py2(obj):
-    """Fully qualified name in Python 2 for 'builtin_function_or_method'
-    objects.
-    """
-
-    if obj.__self__ is None:
-        # built-in functions
-        module = obj.__module__
-        qualname = obj.__name__
-    else:
-        # built-in methods
-        if inspect.isclass(obj.__self__):
-            cls = obj.__self__
-        else:
-            cls = obj.__self__.__class__
-        module = cls.__module__
-        qualname = cls.__name__ + '.' + obj.__name__
-
-    return module + '.' + qualname
-
-
-def _fully_qualified_name_method_py2(obj):
-    """Fully qualified name for 'instancemethod' objects in Python 2.
-    """
-
-    if obj.__self__ is None:
-        # unbound method
-        module = obj.im_class.__module__
-        cls = obj.im_class.__name__
-    else:
-        # bound method
-        if inspect.isclass(obj.__self__):
-            # method decorated with @classmethod
-            module = obj.__self__.__module__
-            cls = obj.__self__.__name__
-        else:
-            module = obj.__self__.__class__.__module__
-            cls = obj.__self__.__class__.__name__
-
-    return module + '.' + cls + '.' + obj.__func__.__name__
 
 
 def _get_user_ns_object(shell, path):
